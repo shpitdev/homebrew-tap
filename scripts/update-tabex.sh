@@ -181,8 +181,26 @@ class Tabex < Formula
     bin.install "tabex"
   end
 
+  def caveats
+    <<~EOS
+      Tabex needs browser-profile and extension setup after install.
+      Start with:
+        tabex setup
+
+      That saves browser config, installs or updates the managed Chrome extension locally,
+      and prints the Chrome load or refresh steps.
+    EOS
+  end
+
   test do
-    assert_match version.to_s, shell_output("#{bin}/tabex version")
+    require "json"
+
+    payload = JSON.parse(shell_output("#{bin}/tabex --json"))
+    assert_equal "tabex", payload["command"]
+    assert_equal "tabex <command>", payload["usage"]
+    assert_equal "v#{version}", payload["version"]
+    assert_equal "docs/curated-e2e-examples.md", payload["curatedExamplesDoc"]
+    assert_equal "setup", payload["examples"].first["label"]
   end
 end
 EOF

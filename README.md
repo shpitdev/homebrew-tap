@@ -33,6 +33,14 @@ HOMEBREW_GITHUB_API_TOKEN="$(gh auth token)" brew install shpitdev/tap/tabex
 HOMEBREW_GITHUB_API_TOKEN="$(gh auth token)" brew install shpitdev/tap/osyrra
 ```
 
+After `brew install shpitdev/tap/tabex`, start with:
+
+```bash
+tabex setup
+```
+
+That saves browser config, installs or updates the managed Chrome extension locally, and prints the Chrome load or refresh steps.
+
 ## Current Limitation
 
 - Both formulae are macOS arm64 only. The upstream releases do not ship a `darwin_amd64` asset today; add one upstream and the updater scripts can gain an `on_intel` block.
