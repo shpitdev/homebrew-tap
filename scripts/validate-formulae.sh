@@ -19,6 +19,14 @@ if [[ -f "${tabex_formula}" ]]; then
   grep -q 'tabex setup' "${tabex_formula}"
 fi
 
+meshix_formula="${repo_root}/Formula/meshix-cli.rb"
+if [[ -f "${meshix_formula}" ]]; then
+  grep -q 'url "https://github.com/shpitdev/meshix-observability/releases/download/v' "${meshix_formula}"
+  grep -q 'bin.install "meshix-cli"' "${meshix_formula}"
+  grep -q 'meshix-cli --help' "${meshix_formula}"
+  grep -q 'meshix-cli-dev' "${meshix_formula}"
+fi
+
 osyrra_formula="${repo_root}/Formula/osyrra.rb"
 if [[ -f "${osyrra_formula}" ]]; then
   grep -q 'using: OsyrraGitHubReleaseDownloadStrategy' "${osyrra_formula}"
