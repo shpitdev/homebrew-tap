@@ -79,7 +79,19 @@ class Tabex < Formula
     bin.install "tabex"
   end
 
+  def caveats
+    <<~EOS
+      Tabex needs browser-profile and extension setup after install.
+      Start with:
+        tabex --help
+
+      Follow the setup/control commands shown by your installed release.
+    EOS
+  end
+
   test do
-    assert_match version.to_s, shell_output("#{bin}/tabex version")
+    output = shell_output("#{bin}/tabex --help")
+    assert_match "usage: tabex <command>", output
+    assert_match "network <command>", output
   end
 end

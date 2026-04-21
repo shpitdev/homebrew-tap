@@ -84,6 +84,14 @@ For local `brew install shpitdev/tap/tabex`, the formula uses the same auth path
 - if none are set, it falls back to `gh auth token`
 - in headless environments, prefer `HOMEBREW_GITHUB_API_TOKEN="$(gh auth token)" brew install ...`
 
+For `tabex`, the formula caveat currently points users at:
+
+```bash
+tabex --help
+```
+
+That is intentional. The latest stable release should define the first-run surface; the tap should not assume newer unreleased setup commands until a new stable release is actually cut.
+
 ## Package-Manager Install Behavior
 
 Both private formulae use install-side GitHub auth:
