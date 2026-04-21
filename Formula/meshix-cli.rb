@@ -1,4 +1,4 @@
-class TabexGitHubReleaseDownloadStrategy < CurlDownloadStrategy
+class MeshixCliGitHubReleaseDownloadStrategy < CurlDownloadStrategy
   def initialize(url, name, version, **meta)
     @resolved_basename = meta.delete(:resolved_basename)
     @github_token = resolve_github_token
@@ -7,7 +7,7 @@ class TabexGitHubReleaseDownloadStrategy < CurlDownloadStrategy
       raise CurlDownloadStrategyError.new(
         url,
         [
-          "GitHub authentication is required to download the private tabex release asset.",
+          "GitHub authentication is required to download the private meshix-cli release asset.",
           "Set HOMEBREW_GITHUB_API_TOKEN, GH_TOKEN, GITHUB_TOKEN, or SHPIT_GH_TOKEN,",
           "or log in with gh auth login."
         ].join(" ")
@@ -59,45 +59,39 @@ class TabexGitHubReleaseDownloadStrategy < CurlDownloadStrategy
   end
 end
 
-class Tabex < Formula
-  desc "Tabex CLI for browser session, capture, and page inspection"
-  homepage "https://github.com/shpitdev/tabex"
-  version "0.0.5"
+class MeshixCli < Formula
+  desc "Meshix CLI for run inspection and generation workflows"
+  homepage "https://github.com/shpitdev/meshix-observability"
+  version "0.0.1"
   license :cannot_represent
   depends_on arch: :arm64
 
   on_macos do
     on_arm do
-      url "https://api.github.com/repos/shpitdev/tabex/releases/assets/401540246",
-          using: TabexGitHubReleaseDownloadStrategy,
-          resolved_basename: "tabex_v0.0.5_darwin_arm64.tar.gz"
-      sha256 "e4a7477b220fbb31e21cf818e88be56e013dfbf3fe2b70bc862171287275e80f"
+      url "https://api.github.com/repos/shpitdev/meshix-observability/releases/assets/391763692",
+          using: MeshixCliGitHubReleaseDownloadStrategy,
+          resolved_basename: "meshix-cli_v0.0.1_darwin_arm64.tar.gz"
+      sha256 "01e42197ff960a8f6033f80178800f8ede31bb8e18e276f705abc72b17ba7426"
     end
   end
 
   def install
-    bin.install "tabex"
+    bin.install "meshix-cli"
   end
 
   def caveats
     <<~EOS
-      Tabex needs browser-profile and extension setup after install.
+      Package-manager installs provide the stable meshix-cli command only.
       Start with:
-        tabex setup
+        meshix-cli --help
 
-      That saves browser config, installs or updates the managed Chrome extension locally,
-      and prints the Chrome load or refresh steps.
+      For a checkout-linked dev command, install meshix-cli-dev from a local checkout.
     EOS
   end
 
   test do
-    require "json"
-
-    payload = JSON.parse(shell_output("#{bin}/tabex --json"))
-    assert_equal "tabex", payload["command"]
-    assert_equal "tabex <command>", payload["usage"]
-    assert_equal "v#{version}", payload["version"]
-    assert_equal "docs/curated-e2e-examples.md", payload["curatedExamplesDoc"]
-    assert_equal "setup", payload["examples"].first["label"]
+    output = shell_output("#{bin}/meshix-cli --help")
+    assert_match "meshix-cli", output
+    assert_match "architecture", output
   end
 end

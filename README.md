@@ -8,6 +8,7 @@ This repo is the tap source of truth. Formulae are updated by repo-owned scripts
 
 | Formula | Upstream | Notes |
 |---|---|---|
+| `meshix-cli` | `shpitdev/meshix-observability` GitHub Releases | Private darwin arm64 release asset fetched through the GitHub Releases API. The formula reads `HOMEBREW_GITHUB_API_TOKEN`, `GH_TOKEN`, `GITHUB_TOKEN`, or `SHPIT_GH_TOKEN`, and falls back to `gh auth token` when available. |
 | `tabex` | `shpitdev/tabex` GitHub Releases | Private darwin arm64 release asset fetched through the GitHub Releases API. The formula reads `HOMEBREW_GITHUB_API_TOKEN`, `GH_TOKEN`, `GITHUB_TOKEN`, or `SHPIT_GH_TOKEN`, and falls back to `gh auth token` when available. |
 | `osyrra` | `shpitdev/osyrra` GitHub Releases | Private darwin arm64 release asset fetched through the GitHub Releases API. Same auth path as `tabex`. |
 
@@ -22,6 +23,7 @@ Once the GitHub repo exists as `shpitdev/homebrew-tap`:
 
 ```bash
 brew tap shpitdev/tap
+brew install shpitdev/tap/meshix-cli
 brew install shpitdev/tap/tabex
 brew install shpitdev/tap/osyrra
 ```
@@ -29,6 +31,7 @@ brew install shpitdev/tap/osyrra
 If `gh` is not installed or not logged in locally, run installs with an explicit token:
 
 ```bash
+HOMEBREW_GITHUB_API_TOKEN="$(gh auth token)" brew install shpitdev/tap/meshix-cli
 HOMEBREW_GITHUB_API_TOKEN="$(gh auth token)" brew install shpitdev/tap/tabex
 HOMEBREW_GITHUB_API_TOKEN="$(gh auth token)" brew install shpitdev/tap/osyrra
 ```
@@ -43,9 +46,9 @@ That saves browser config, installs or updates the managed Chrome extension loca
 
 ## Current Limitation
 
-- Both formulae are macOS arm64 only. The upstream releases do not ship a `darwin_amd64` asset today; add one upstream and the updater scripts can gain an `on_intel` block.
-- Both upstreams are private repos, so this tap is SHPIT-internal until release assets become public.
-- Automation can read those releases with the `SHPIT_GH_TOKEN` secret.
+- All current formulae are macOS arm64 only. The upstream releases do not ship a `darwin_amd64` asset today; add one upstream and the updater scripts can gain an `on_intel` block where appropriate.
+- `meshix-cli`, `tabex`, and `osyrra` currently come from private upstream repos, so these install paths remain SHPIT-internal until their release assets become public.
+- Automation reads those private releases with the `SHPIT_GH_TOKEN` secret.
 
 ## Local Usage
 

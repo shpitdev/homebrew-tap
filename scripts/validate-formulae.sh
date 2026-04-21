@@ -19,6 +19,16 @@ if [[ -f "${tabex_formula}" ]]; then
   grep -q 'tabex setup' "${tabex_formula}"
 fi
 
+meshix_formula="${repo_root}/Formula/meshix-cli.rb"
+if [[ -f "${meshix_formula}" ]]; then
+  grep -q 'using: MeshixCliGitHubReleaseDownloadStrategy' "${meshix_formula}"
+  grep -q 'resolved_basename: "meshix-cli_v' "${meshix_formula}"
+  grep -q 'url "https://api.github.com/repos/shpitdev/meshix-observability/releases/assets/' "${meshix_formula}"
+  grep -q 'bin.install "meshix-cli"' "${meshix_formula}"
+  grep -q 'meshix-cli --help' "${meshix_formula}"
+  grep -q 'meshix-cli-dev' "${meshix_formula}"
+fi
+
 osyrra_formula="${repo_root}/Formula/osyrra.rb"
 if [[ -f "${osyrra_formula}" ]]; then
   grep -q 'using: OsyrraGitHubReleaseDownloadStrategy' "${osyrra_formula}"
@@ -32,6 +42,10 @@ trap 'rm -rf "${tmpdir}"' EXIT
 cp -a "${repo_root}/." "${tmpdir}/repo"
 (
   cd "${tmpdir}/repo"
+  if [[ -z "${MESHIX_CLI_VERSION:-}" && -f Formula/meshix-cli.rb ]]; then
+    MESHIX_CLI_VERSION="$(sed -n 's/^  version "\([^"]*\)"$/\1/p' Formula/meshix-cli.rb | head -n 1)"
+    export MESHIX_CLI_VERSION
+  fi
   ./scripts/update-formulae.sh auto
 )
 

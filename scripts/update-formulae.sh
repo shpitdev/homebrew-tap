@@ -8,13 +8,14 @@ if (($# == 0)); then
 fi
 
 if [[ "$1" == "auto" ]]; then
-  formulae=()
+  formulae=(meshix-cli)
   if [[ -n "${SHPIT_GH_TOKEN:-}" || -z "${GITHUB_ACTIONS:-}" ]]; then
     formulae+=(tabex)
     formulae+=(osyrra)
   fi
 elif [[ "$1" == "all" ]]; then
   formulae=(
+    meshix-cli
     tabex
     osyrra
   )
@@ -24,6 +25,13 @@ fi
 
 for formula in "${formulae[@]}"; do
   case "${formula}" in
+    meshix-cli)
+      if [[ "$1" == "auto" ]]; then
+        "${repo_root}/scripts/update-meshix-cli.sh" --optional
+      else
+        "${repo_root}/scripts/update-meshix-cli.sh"
+      fi
+      ;;
     tabex)
       if [[ "$1" == "auto" ]]; then
         "${repo_root}/scripts/update-tabex.sh" --optional
