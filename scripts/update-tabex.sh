@@ -185,16 +185,22 @@ class Tabex < Formula
     <<~EOS
       Tabex needs browser-profile and extension setup after install.
       Start with:
-        tabex --help
+        tabex setup
 
-      Follow the setup/control commands shown by your installed release.
+      That saves browser config, installs or updates the managed Chrome extension locally,
+      and prints the Chrome load or refresh steps.
     EOS
   end
 
   test do
-    output = shell_output("#{bin}/tabex --help")
-    assert_match "usage: tabex <command>", output
-    assert_match "network <command>", output
+    require "json"
+
+    payload = JSON.parse(shell_output("#{bin}/tabex --json"))
+    assert_equal "tabex", payload["command"]
+    assert_equal "tabex <command>", payload["usage"]
+    assert_equal "v#{version}", payload["version"]
+    assert_equal "docs/curated-e2e-examples.md", payload["curatedExamplesDoc"]
+    assert_equal "setup", payload["examples"].first["label"]
   end
 end
 EOF

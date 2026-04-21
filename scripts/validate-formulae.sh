@@ -13,8 +13,10 @@ if [[ -f "${tabex_formula}" ]]; then
   grep -q 'using: TabexGitHubReleaseDownloadStrategy' "${tabex_formula}"
   grep -q 'resolved_basename: "tabex_v' "${tabex_formula}"
   grep -q 'url "https://api.github.com/repos/shpitdev/tabex/releases/assets/' "${tabex_formula}"
-  grep -q 'shell_output("#{bin}/tabex --help")' "${tabex_formula}"
+  grep -q 'shell_output("#{bin}/tabex --json")' "${tabex_formula}"
+  grep -q 'assert_equal "v#{version}", payload\["version"\]' "${tabex_formula}"
   grep -q 'Tabex needs browser-profile and extension setup after install.' "${tabex_formula}"
+  grep -q 'tabex setup' "${tabex_formula}"
 fi
 
 osyrra_formula="${repo_root}/Formula/osyrra.rb"

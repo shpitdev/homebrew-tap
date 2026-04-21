@@ -36,10 +36,10 @@ HOMEBREW_GITHUB_API_TOKEN="$(gh auth token)" brew install shpitdev/tap/osyrra
 After `brew install shpitdev/tap/tabex`, start with:
 
 ```bash
-tabex --help
+tabex setup
 ```
 
-The formula caveat intentionally points at the installed release surface rather than assuming newer unreleased setup commands.
+That saves browser config, installs or updates the managed Chrome extension locally, and prints the Chrome load or refresh steps.
 
 ## Current Limitation
 

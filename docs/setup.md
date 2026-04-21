@@ -87,10 +87,10 @@ For local `brew install shpitdev/tap/tabex`, the formula uses the same auth path
 For `tabex`, the formula caveat currently points users at:
 
 ```bash
-tabex --help
+tabex setup
 ```
 
-That is intentional. The latest stable release should define the first-run surface; the tap should not assume newer unreleased setup commands until a new stable release is actually cut.
+That is intentional. `v0.0.4` is the first stable release that ships the source-repo-side `setup` flow, so the tap can now safely point users at the real first-run path instead of a generic help screen.
 
 ## Package-Manager Install Behavior
 

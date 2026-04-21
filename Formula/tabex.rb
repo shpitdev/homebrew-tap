@@ -62,16 +62,16 @@ end
 class Tabex < Formula
   desc "Tabex CLI for browser session, capture, and page inspection"
   homepage "https://github.com/shpitdev/tabex"
-  version "0.0.3"
+  version "0.0.4"
   license :cannot_represent
   depends_on arch: :arm64
 
   on_macos do
     on_arm do
-      url "https://api.github.com/repos/shpitdev/tabex/releases/assets/400657957",
+      url "https://api.github.com/repos/shpitdev/tabex/releases/assets/401429381",
           using: TabexGitHubReleaseDownloadStrategy,
-          resolved_basename: "tabex_v0.0.3_darwin_arm64.tar.gz"
-      sha256 "7c72aa51434c55f6bffbaaa6606883f5a45efce4f57e04ef02eb65ed9533439c"
+          resolved_basename: "tabex_v0.0.4_darwin_arm64.tar.gz"
+      sha256 "8e5bdf30d9a57d34fec3bbb8973041dd1f8df821325652d1d16f40083f98b666"
     end
   end
 
@@ -83,15 +83,21 @@ class Tabex < Formula
     <<~EOS
       Tabex needs browser-profile and extension setup after install.
       Start with:
-        tabex --help
+        tabex setup
 
-      Follow the setup/control commands shown by your installed release.
+      That saves browser config, installs or updates the managed Chrome extension locally,
+      and prints the Chrome load or refresh steps.
     EOS
   end
 
   test do
-    output = shell_output("#{bin}/tabex --help")
-    assert_match "usage: tabex <command>", output
-    assert_match "network <command>", output
+    require "json"
+
+    payload = JSON.parse(shell_output("#{bin}/tabex --json"))
+    assert_equal "tabex", payload["command"]
+    assert_equal "tabex <command>", payload["usage"]
+    assert_equal "v#{version}", payload["version"]
+    assert_equal "docs/curated-e2e-examples.md", payload["curatedExamplesDoc"]
+    assert_equal "setup", payload["examples"].first["label"]
   end
 end
