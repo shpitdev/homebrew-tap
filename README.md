@@ -8,8 +8,8 @@ This repo is the tap source of truth. Formulae are updated by repo-owned scripts
 
 | Formula | Upstream | Notes |
 |---|---|---|
-| `meshix-cli` | `shpitdev/meshix-observability` GitHub Releases | Private darwin arm64 release asset fetched through the GitHub Releases API. The formula reads `HOMEBREW_GITHUB_API_TOKEN`, `GH_TOKEN`, `GITHUB_TOKEN`, or `SHPIT_GH_TOKEN`, and falls back to `gh auth token` when available. |
-| `tabex` | `shpitdev/tabex` GitHub Releases | Private darwin arm64 release asset fetched through the GitHub Releases API. The formula reads `HOMEBREW_GITHUB_API_TOKEN`, `GH_TOKEN`, `GITHUB_TOKEN`, or `SHPIT_GH_TOKEN`, and falls back to `gh auth token` when available. |
+| `meshix-cli` | `shpitdev/meshix-observability` GitHub Releases | Private darwin arm64 release asset fetched through the GitHub Releases API. The formula first checks `HOMEBREW_GITHUB_API_TOKEN`, `GH_TOKEN`, and `GITHUB_TOKEN`, then falls back to `gh auth token`, and only then checks `SHPIT_GH_TOKEN` for SHPIT automation environments. |
+| `tabex` | `shpitdev/tabex` GitHub Releases | Private darwin arm64 release asset fetched through the GitHub Releases API. The formula first checks `HOMEBREW_GITHUB_API_TOKEN`, `GH_TOKEN`, and `GITHUB_TOKEN`, then falls back to `gh auth token`, and only then checks `SHPIT_GH_TOKEN` for SHPIT automation environments. |
 | `osyrra` | `shpitdev/osyrra` GitHub Releases | Private darwin arm64 release asset fetched through the GitHub Releases API. Same auth path as `tabex`. |
 
 ## Automation
@@ -48,7 +48,7 @@ That saves browser config, installs or updates the managed Chrome extension loca
 
 - All current formulae are macOS arm64 only. The upstream releases do not ship a `darwin_amd64` asset today; add one upstream and the updater scripts can gain an `on_intel` block where appropriate.
 - `meshix-cli`, `tabex`, and `osyrra` currently come from private upstream repos, so these install paths remain SHPIT-internal until their release assets become public.
-- Automation reads those private releases with the `SHPIT_GH_TOKEN` secret.
+- Automation reads those private releases with the `SHPIT_GH_TOKEN` secret, but local installs should usually rely on your logged-in `gh` session or one of the standard Homebrew GitHub token env vars.
 
 ## Local Usage
 
