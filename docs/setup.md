@@ -17,6 +17,13 @@ Result:
 - branch and PR creation use the repo `GITHUB_TOKEN`
 - private SHPIT formula refreshes work only if the repo can read `SHPIT_GH_TOKEN`
 - there is no separate publish workflow because the tap repo itself is the distribution surface
+- upstream `tabex` and `osyrra` release workflows can also trigger this workflow automatically with `gh workflow run version-bumps.yml`, but that depends on `SHPIT_WORKFLOW_DISPATCH_TOKEN` being available in their Depot CI repo secrets
+
+## GitHub UI Links
+
+- create PAT: <https://github.com/settings/personal-access-tokens>
+- review active org PATs: <https://github.com/organizations/shpitdev/settings/personal-access-tokens/active>
+- manage org Actions secrets: <https://github.com/organizations/shpitdev/settings/secrets/actions>
 
 ## SHPIT_GH_TOKEN
 
@@ -29,6 +36,35 @@ gh secret set SHPIT_GH_TOKEN \
   --org shpitdev \
   --repos homebrew-tap \
   --body "$(gh auth token)"
+```
+
+## SHPIT_WORKFLOW_DISPATCH_TOKEN
+
+Create a fine-grained PAT that can trigger workflow dispatches in:
+
+- `shpitdev/homebrew-tap`
+- `shpitdev/pkgbuilds`
+
+Store that PAT as the GitHub org secret `SHPIT_WORKFLOW_DISPATCH_TOKEN` with `selected` visibility for these producer repos:
+
+- `shpitdev/tabex`
+- `shpitdev/osyrra`
+
+Those producer release workflows run in Depot CI, so GitHub org secrets are not enough on their own. Mirror the same secret into Depot for each producer repo with one of these paths:
+
+```bash
+cd /home/anandpant/Development/shpitdev/tabex
+depot ci migrate secrets-and-vars -y
+
+cd /home/anandpant/Development/shpitdev/osyrra
+depot ci migrate secrets-and-vars -y
+```
+
+Or add the Depot secrets directly:
+
+```bash
+depot ci secrets add SHPIT_WORKFLOW_DISPATCH_TOKEN --repo shpitdev/tabex
+depot ci secrets add SHPIT_WORKFLOW_DISPATCH_TOKEN --repo shpitdev/osyrra
 ```
 
 ## Local Operator Flow
