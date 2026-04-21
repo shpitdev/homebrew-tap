@@ -17,6 +17,7 @@ fi
 repo_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 formula_path="${repo_root}/Formula/meshix-cli.rb"
 repo="shpitdev/meshix-observability"
+requested_version="${MESHIX_CLI_VERSION:-latest}"
 
 verify_sha256() {
   local expected="$1"
@@ -38,7 +39,34 @@ verify_sha256() {
   fi
 }
 
-release_json="$(gh api "repos/${repo}/releases/latest")"
+resolve_release_json() {
+  local version="$1"
+  local endpoint
+
+  if [[ -z "${version}" || "${version}" == "latest" ]]; then
+    endpoint="repos/${repo}/releases/latest"
+  else
+    if [[ "${version}" != v* ]]; then
+      version="v${version}"
+    fi
+    endpoint="repos/${repo}/releases/tags/${version}"
+  fi
+
+  if [[ -n "${SHPIT_GH_TOKEN:-}" ]]; then
+    GH_TOKEN="${SHPIT_GH_TOKEN}" gh api "${endpoint}"
+  elif [[ -n "${GITHUB_ACTIONS:-}" ]]; then
+    if [[ "${optional}" == "true" ]]; then
+      echo "Skipping meshix-cli: SHPIT_GH_TOKEN is not configured in GitHub Actions." >&2
+      exit 0
+    fi
+    echo "SHPIT_GH_TOKEN is required in GitHub Actions to read the private meshix-cli release." >&2
+    exit 1
+  else
+    gh api "${endpoint}"
+  fi
+}
+
+release_json="$(resolve_release_json "${requested_version}")"
 version="$(jq -r '.tag_name | ltrimstr("v")' <<<"${release_json}")"
 arm64_json="$(jq -c '
   .assets
@@ -47,23 +75,24 @@ arm64_json="$(jq -c '
 ' <<<"${release_json}")"
 
 arm64_asset="$(jq -r '.name // empty' <<<"${arm64_json}")"
+arm64_api_url="$(jq -r '.url // empty' <<<"${arm64_json}")"
 arm64_sha="$(jq -r '.digest // empty' <<<"${arm64_json}")"
 
-if [[ -z "${arm64_asset}" || "${arm64_asset}" == "null" ]]; then
+if [[ -z "${arm64_asset}" || "${arm64_asset}" == "null" || -z "${arm64_api_url}" || "${arm64_api_url}" == "null" ]]; then
   if [[ "${optional}" == "true" ]]; then
-    echo "Skipping meshix-cli: latest release is missing a darwin arm64 archive." >&2
+    echo "Skipping meshix-cli: release is missing a darwin arm64 archive." >&2
     exit 0
   fi
-  echo "meshix-cli latest release is missing a darwin arm64 archive" >&2
+  echo "meshix-cli release is missing a darwin arm64 archive" >&2
   exit 1
 fi
 
 if [[ -z "${arm64_sha}" || "${arm64_sha}" == "null" ]]; then
   if [[ "${optional}" == "true" ]]; then
-    echo "Skipping meshix-cli: latest release is missing a darwin arm64 digest." >&2
+    echo "Skipping meshix-cli: release is missing a darwin arm64 digest." >&2
     exit 0
   fi
-  echo "meshix-cli latest release is missing a darwin arm64 digest" >&2
+  echo "meshix-cli release is missing a darwin arm64 digest" >&2
   exit 1
 fi
 
@@ -72,8 +101,13 @@ arm64_sha="${arm64_sha#sha256:}"
 tmpdir="$(mktemp -d)"
 trap 'rm -rf "${tmpdir}"' EXIT
 
-gh release download "v${version}" --repo "${repo}" \
-  --pattern "${arm64_asset}" --dir "${tmpdir}" --clobber >/dev/null
+if [[ -n "${SHPIT_GH_TOKEN:-}" ]]; then
+  GH_TOKEN="${SHPIT_GH_TOKEN}" gh release download "v${version}" --repo "${repo}" \
+    --pattern "${arm64_asset}" --dir "${tmpdir}" --clobber >/dev/null
+else
+  gh release download "v${version}" --repo "${repo}" \
+    --pattern "${arm64_asset}" --dir "${tmpdir}" --clobber >/dev/null
+fi
 
 (
   cd "${tmpdir}"
@@ -82,6 +116,67 @@ gh release download "v${version}" --repo "${repo}" \
 )
 
 cat > "${formula_path}" <<EOF
+class MeshixCliGitHubReleaseDownloadStrategy < CurlDownloadStrategy
+  def initialize(url, name, version, **meta)
+    @resolved_basename = meta.delete(:resolved_basename)
+    @github_token = resolve_github_token
+
+    if @github_token.nil? || @github_token.empty?
+      raise CurlDownloadStrategyError.new(
+        url,
+        [
+          "GitHub authentication is required to download the private meshix-cli release asset.",
+          "Set HOMEBREW_GITHUB_API_TOKEN, GH_TOKEN, GITHUB_TOKEN, or SHPIT_GH_TOKEN,",
+          "or log in with gh auth login."
+        ].join(" ")
+      )
+    end
+
+    meta[:headers] ||= []
+    meta[:headers] << "Accept: application/octet-stream"
+    meta[:headers] << "Authorization: Bearer #{@github_token}"
+    super
+  end
+
+  private
+
+  def resolve_github_token
+    %w[HOMEBREW_GITHUB_API_TOKEN GH_TOKEN GITHUB_TOKEN SHPIT_GH_TOKEN].each do |key|
+      value = ENV[key]&.strip
+      return value unless value.nil? || value.empty?
+    end
+
+    [
+      "#{HOMEBREW_PREFIX}/bin/gh",
+      "/opt/homebrew/bin/gh",
+      "/usr/local/bin/gh",
+      "gh"
+    ].uniq.each do |gh|
+      next if gh != "gh" && !File.executable?(gh)
+
+      value = Utils.safe_popen_read(gh, "auth", "token").strip
+      return value unless value.empty?
+    rescue ErrorDuringExecution, Errno::ENOENT
+      next
+    end
+
+    nil
+  end
+
+  def resolve_url_basename_time_file_size(url, timeout: nil)
+    resolved_url, _, last_modified, file_size, content_type, is_redirection = super
+    [resolved_url, @resolved_basename, last_modified, file_size, content_type, is_redirection]
+  end
+
+  def curl_output(*args, **options)
+    super(*args, secrets: [@github_token], **options)
+  end
+
+  def curl(*args, print_stdout: true, **options)
+    super(*args, print_stdout: print_stdout, secrets: [@github_token], **options)
+  end
+end
+
 class MeshixCli < Formula
   desc "Meshix CLI for run inspection and generation workflows"
   homepage "https://github.com/shpitdev/meshix-observability"
@@ -91,7 +186,9 @@ class MeshixCli < Formula
 
   on_macos do
     on_arm do
-      url "https://github.com/shpitdev/meshix-observability/releases/download/v${version}/${arm64_asset}"
+      url "${arm64_api_url}",
+          using: MeshixCliGitHubReleaseDownloadStrategy,
+          resolved_basename: "${arm64_asset}"
       sha256 "${arm64_sha}"
     end
   end

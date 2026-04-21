@@ -27,7 +27,7 @@ Result:
 
 ## SHPIT_GH_TOKEN
 
-Create the secret (org-level or repo-level) with access to read private releases on `shpitdev/tabex` and `shpitdev/osyrra`. An org-level secret with `selected` visibility works well if you consume it from multiple repos. `meshix-cli` does not need this secret because `shpitdev/meshix-observability` publishes public releases.
+Create the secret (org-level or repo-level) with access to read private releases on `shpitdev/meshix-observability`, `shpitdev/tabex`, and `shpitdev/osyrra`. An org-level secret with `selected` visibility works well if you consume it from multiple repos.
 
 Attach it to this repo with:
 
@@ -83,13 +83,11 @@ If you are logged into GitHub locally with `gh auth login`, you can run:
 
 That uses your local GitHub CLI session for private release access.
 
-For local installs:
+For local installs, all three SHPIT formulae (`meshix-cli`, `tabex`, and `osyrra`) use the same private-auth path:
 
-- `brew install shpitdev/tap/meshix-cli` uses the public release asset and does not require any extra token
-- `brew install shpitdev/tap/tabex` and `brew install shpitdev/tap/osyrra` use the private-auth path:
-  - they first check `HOMEBREW_GITHUB_API_TOKEN`, `GH_TOKEN`, `GITHUB_TOKEN`, and `SHPIT_GH_TOKEN`
-  - if none are set, they fall back to `gh auth token`
-  - in headless environments, prefer `HOMEBREW_GITHUB_API_TOKEN="$(gh auth token)" brew install ...`
+- they first check `HOMEBREW_GITHUB_API_TOKEN`, `GH_TOKEN`, `GITHUB_TOKEN`, and `SHPIT_GH_TOKEN`
+- if none are set, they fall back to `gh auth token`
+- in headless environments, prefer `HOMEBREW_GITHUB_API_TOKEN="$(gh auth token)" brew install ...`
 
 For `tabex`, the formula caveat currently points users at:
 
@@ -101,9 +99,7 @@ That is intentional. `v0.0.4` is the first stable release that ships the source-
 
 ## Package-Manager Install Behavior
 
-`meshix-cli` uses the public GitHub release download path, so it behaves like a normal public Homebrew formula.
-
-The private formulae (`tabex` and `osyrra`) use install-side GitHub auth:
+All three current SHPIT formulae use install-side GitHub auth:
 
 - they check `HOMEBREW_GITHUB_API_TOKEN`, `GH_TOKEN`, `GITHUB_TOKEN`, and `SHPIT_GH_TOKEN`
 - if no token env var is present, they fall back to `gh auth token`

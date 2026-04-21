@@ -2,6 +2,10 @@ name: version-bumps
 
 on:
   workflow_dispatch:
+    inputs:
+      meshix_cli_version:
+        description: Optional Meshix CLI release tag to pin for this run (for example v0.0.2)
+        required: false
   schedule:
     - cron: '41 6 * * *'
 
@@ -15,6 +19,7 @@ jobs:
     env:
       GH_TOKEN: ${{ github.token }}
       SHPIT_GH_TOKEN: ${{ secrets.SHPIT_GH_TOKEN }}
+      MESHIX_CLI_VERSION: ${{ github.event.inputs.meshix_cli_version || '' }}
       UPDATE_BRANCH: automation/version-bumps
     steps:
       - name: Checkout
