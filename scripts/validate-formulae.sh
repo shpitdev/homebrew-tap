@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+repo_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
+
+for formula in "${repo_root}"/Formula/*.rb; do
+  [[ -f "${formula}" ]] || continue
+  ruby -c "${formula}" >/dev/null
+done
+
+tabex_formula="${repo_root}/Formula/tabex.rb"
+if [[ -f "${tabex_formula}" ]]; then
+  grep -q 'using: TabexGitHubReleaseDownloadStrategy' "${tabex_formula}"
+  grep -q 'resolved_basename: "tabex_v' "${tabex_formula}"
+  grep -q 'url "https://api.github.com/repos/shpitdev/tabex/releases/assets/' "${tabex_formula}"
+fi
+
+osyrra_formula="${repo_root}/Formula/osyrra.rb"
+if [[ -f "${osyrra_formula}" ]]; then
+  grep -q 'using: OsyrraGitHubReleaseDownloadStrategy' "${osyrra_formula}"
+  grep -q 'resolved_basename: "osyrra_v' "${osyrra_formula}"
+  grep -q 'url "https://api.github.com/repos/shpitdev/osyrra/releases/assets/' "${osyrra_formula}"
+fi
+
+tmpdir="$(mktemp -d)"
+trap 'rm -rf "${tmpdir}"' EXIT
+
+cp -a "${repo_root}/." "${tmpdir}/repo"
+(
+  cd "${tmpdir}/repo"
+  ./scripts/update-formulae.sh auto
+)
+
+diff -ru "${repo_root}/Formula" "${tmpdir}/repo/Formula"

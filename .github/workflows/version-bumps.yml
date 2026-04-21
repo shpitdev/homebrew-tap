@@ -1,0 +1,82 @@
+name: version-bumps
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '41 6 * * *'
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      SHPIT_GH_TOKEN: ${{ secrets.SHPIT_GH_TOKEN }}
+      UPDATE_BRANCH: automation/version-bumps
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+
+      - name: Install updater dependencies
+        run: sudo apt-get update && sudo apt-get install --yes jq ruby
+
+      - name: Configure git identity
+        run: |
+          git config user.name "shpit-bot"
+          git config user.email "opensource@shpit.dev"
+
+      - name: Update formulae
+        run: ./scripts/update-formulae.sh auto
+
+      - name: Detect changes
+        id: detect
+        run: |
+          if git diff --quiet; then
+            echo 'changed=false' >> "${GITHUB_OUTPUT}"
+          else
+            echo 'changed=true' >> "${GITHUB_OUTPUT}"
+          fi
+
+      - name: Commit and push branch
+        if: ${{ steps.detect.outputs.changed == 'true' }}
+        run: |
+          git checkout -B "${UPDATE_BRANCH}"
+          git add README.md docs scripts .github/workflows Formula .gitignore
+          git commit -m "chore(homebrew-tap): bump formula versions"
+          git push --force --set-upstream origin "${UPDATE_BRANCH}"
+
+      - name: Open or update pull request
+        if: ${{ steps.detect.outputs.changed == 'true' }}
+        run: |
+          #!/usr/bin/env bash
+          set -euo pipefail
+
+          pr_number="$(gh pr list \
+            --head "${UPDATE_BRANCH}" \
+            --base main \
+            --json number \
+            --jq '.[0].number // empty')"
+
+          title="chore(homebrew-tap): bump formula versions"
+          body_file="$(mktemp)"
+          cat <<'EOF' > "${body_file}"
+          ## Summary
+
+          - update Homebrew formula versions and darwin checksums
+          - keep the tap metadata aligned with the updater scripts
+          EOF
+
+          if [[ -n "${pr_number}" ]]; then
+            gh pr edit "${pr_number}" --title "${title}" --body-file "${body_file}"
+          else
+            gh pr create \
+              --base main \
+              --head "${UPDATE_BRANCH}" \
+              --title "${title}" \
+              --body-file "${body_file}"
+          fi

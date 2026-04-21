@@ -1,0 +1,29 @@
+name: validate
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'Formula/**'
+      - '.github/workflows/**'
+      - 'scripts/**'
+      - 'README.md'
+      - 'docs/**'
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      SHPIT_GH_TOKEN: ${{ secrets.SHPIT_GH_TOKEN }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Install validation dependencies
+        run: sudo apt-get update && sudo apt-get install --yes jq ruby
+
+      - name: Validate formulae
+        run: ./scripts/validate-formulae.sh
