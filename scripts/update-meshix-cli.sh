@@ -60,23 +60,28 @@ resolve_release_json() {
     fi
     if [[ -n "${GITHUB_ACTIONS:-}" && "${optional}" == "true" ]]; then
       echo "Skipping meshix-cli: SHPIT_GH_TOKEN does not currently grant release access to ${repo}." >&2
-      exit 0
+      printf '__SKIP__'
+      return 0
     fi
     echo "SHPIT_GH_TOKEN could not read the private meshix-cli release in ${repo}." >&2
-    exit 1
+    return 1
   elif [[ -n "${GITHUB_ACTIONS:-}" ]]; then
     if [[ "${optional}" == "true" ]]; then
       echo "Skipping meshix-cli: SHPIT_GH_TOKEN is not configured in GitHub Actions." >&2
-      exit 0
+      printf '__SKIP__'
+      return 0
     fi
     echo "SHPIT_GH_TOKEN is required in GitHub Actions to read the private meshix-cli release." >&2
-    exit 1
+    return 1
   else
     gh api "${endpoint}"
   fi
 }
 
 release_json="$(resolve_release_json "${requested_version}")"
+if [[ "${release_json}" == "__SKIP__" ]]; then
+  exit 0
+fi
 version="$(jq -r '.tag_name | ltrimstr("v")' <<<"${release_json}")"
 arm64_json="$(jq -c '
   .assets

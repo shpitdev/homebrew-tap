@@ -42,6 +42,10 @@ trap 'rm -rf "${tmpdir}"' EXIT
 cp -a "${repo_root}/." "${tmpdir}/repo"
 (
   cd "${tmpdir}/repo"
+  if [[ -z "${MESHIX_CLI_VERSION:-}" && -f Formula/meshix-cli.rb ]]; then
+    MESHIX_CLI_VERSION="$(sed -n 's/^  version "\([^"]*\)"$/\1/p' Formula/meshix-cli.rb | head -n 1)"
+    export MESHIX_CLI_VERSION
+  fi
   ./scripts/update-formulae.sh auto
 )
 
