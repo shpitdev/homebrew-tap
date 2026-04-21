@@ -42,6 +42,7 @@ verify_sha256() {
 resolve_release_json() {
   local version="$1"
   local endpoint
+  local output=""
 
   if [[ -z "${version}" || "${version}" == "latest" ]]; then
     endpoint="repos/${repo}/releases/latest"
@@ -53,7 +54,16 @@ resolve_release_json() {
   fi
 
   if [[ -n "${SHPIT_GH_TOKEN:-}" ]]; then
-    GH_TOKEN="${SHPIT_GH_TOKEN}" gh api "${endpoint}"
+    if output="$(GH_TOKEN="${SHPIT_GH_TOKEN}" gh api "${endpoint}" 2>/dev/null)"; then
+      printf '%s' "${output}"
+      return 0
+    fi
+    if [[ -n "${GITHUB_ACTIONS:-}" && "${optional}" == "true" ]]; then
+      echo "Skipping meshix-cli: SHPIT_GH_TOKEN does not currently grant release access to ${repo}." >&2
+      exit 0
+    fi
+    echo "SHPIT_GH_TOKEN could not read the private meshix-cli release in ${repo}." >&2
+    exit 1
   elif [[ -n "${GITHUB_ACTIONS:-}" ]]; then
     if [[ "${optional}" == "true" ]]; then
       echo "Skipping meshix-cli: SHPIT_GH_TOKEN is not configured in GitHub Actions." >&2
