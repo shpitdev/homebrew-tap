@@ -141,8 +141,8 @@ class MeshixCliGitHubReleaseDownloadStrategy < CurlDownloadStrategy
         url,
         [
           "GitHub authentication is required to download the private meshix-cli release asset.",
-          "Set HOMEBREW_GITHUB_API_TOKEN, GH_TOKEN, GITHUB_TOKEN, or SHPIT_GH_TOKEN,",
-          "or log in with gh auth login."
+          "Set HOMEBREW_GITHUB_API_TOKEN, GH_TOKEN, or GITHUB_TOKEN,",
+          "or log in with gh auth login. SHPIT_GH_TOKEN is also supported for SHPIT automation."
         ].join(" ")
       )
     end
@@ -156,7 +156,7 @@ class MeshixCliGitHubReleaseDownloadStrategy < CurlDownloadStrategy
   private
 
   def resolve_github_token
-    %w[HOMEBREW_GITHUB_API_TOKEN GH_TOKEN GITHUB_TOKEN SHPIT_GH_TOKEN].each do |key|
+    %w[HOMEBREW_GITHUB_API_TOKEN GH_TOKEN GITHUB_TOKEN].each do |key|
       value = ENV[key]&.strip
       return value unless value.nil? || value.empty?
     end
@@ -174,6 +174,9 @@ class MeshixCliGitHubReleaseDownloadStrategy < CurlDownloadStrategy
     rescue ErrorDuringExecution, Errno::ENOENT
       next
     end
+
+    value = ENV["SHPIT_GH_TOKEN"]&.strip
+    return value unless value.nil? || value.empty?
 
     nil
   end

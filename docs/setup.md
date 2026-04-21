@@ -85,8 +85,9 @@ That uses your local GitHub CLI session for private release access.
 
 For local installs, all three SHPIT formulae (`meshix-cli`, `tabex`, and `osyrra`) use the same private-auth path:
 
-- they first check `HOMEBREW_GITHUB_API_TOKEN`, `GH_TOKEN`, `GITHUB_TOKEN`, and `SHPIT_GH_TOKEN`
-- if none are set, they fall back to `gh auth token`
+- they first check `HOMEBREW_GITHUB_API_TOKEN`, `GH_TOKEN`, and `GITHUB_TOKEN`
+- if none of those are set, they fall back to `gh auth token`
+- only after that do they check `SHPIT_GH_TOKEN`, so a logged-in local `gh` session wins over an automation token that happens to be exported
 - in headless environments, prefer `HOMEBREW_GITHUB_API_TOKEN="$(gh auth token)" brew install ...`
 
 For `tabex`, the formula caveat currently points users at:
@@ -101,13 +102,14 @@ That is intentional. `v0.0.4` is the first stable release that ships the source-
 
 All three current SHPIT formulae use install-side GitHub auth:
 
-- they check `HOMEBREW_GITHUB_API_TOKEN`, `GH_TOKEN`, `GITHUB_TOKEN`, and `SHPIT_GH_TOKEN`
-- if no token env var is present, they fall back to `gh auth token`
+- they check `HOMEBREW_GITHUB_API_TOKEN`, `GH_TOKEN`, and `GITHUB_TOKEN`
+- if no standard token env var is present, they fall back to `gh auth token`
+- `SHPIT_GH_TOKEN` remains supported as a final SHPIT automation fallback
 
 All current SHPIT formulae are macOS arm64 only today. An Intel Mac install will fail with an architecture guard until the upstream release adds a `darwin_amd64` asset and the relevant formula gains an `on_intel` block.
 
 ## Recommended Follow-Up
 
 1. Confirm `SHPIT_GH_TOKEN` is attached to this repo.
-2. Validate real `brew install shpitdev/tap/meshix-cli`, `brew install shpitdev/tap/tabex`, and `brew install shpitdev/tap/osyrra` flows on a macOS arm64 machine.
+2. Validate real `brew install shpitdev/tap/meshix-cli`, `brew install shpitdev/tap/tabex`, and `brew install shpitdev/tap/osyrra` flows on a macOS arm64 machine, especially in shells where `SHPIT_GH_TOKEN` may already be exported.
 3. Keep the package-manager caveats aligned with the upstream installers when shell or setup UX changes.
