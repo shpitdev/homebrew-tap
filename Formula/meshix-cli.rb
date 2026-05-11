@@ -64,17 +64,17 @@ end
 
 class MeshixCli < Formula
   desc "Meshix CLI for run inspection and generation workflows"
-  homepage "https://github.com/shpitdev/meshix-observability"
-  version "0.0.2"
+  homepage "https://github.com/shpitdev/meshix-mono"
+  version "0.0.5"
   license :cannot_represent
   depends_on arch: :arm64
 
   on_macos do
     on_arm do
-      url "https://api.github.com/repos/shpitdev/meshix-observability/releases/assets/401891227",
+      url "https://api.github.com/repos/shpitdev/meshix-mono/releases/assets/417231484",
           using: MeshixCliGitHubReleaseDownloadStrategy,
-          resolved_basename: "meshix-cli_v0.0.2_darwin_arm64.tar.gz"
-      sha256 "f80902fc7a8b83b4b7a777136271b84e954b3d808a8c1f412dfb8c9ac88a3700"
+          resolved_basename: "meshix-cli_v0.0.5_darwin_arm64.tar.gz"
+      sha256 "0f717d482ac8efdce7772384704974827ab8049e0bce57df408e9e23ef118a3b"
     end
   end
 
@@ -95,6 +95,6 @@ class MeshixCli < Formula
   test do
     output = shell_output("#{bin}/meshix-cli --help")
     assert_match "meshix-cli", output
-    assert_match "architecture", output
+    assert_match "generate", output
   end
 end
