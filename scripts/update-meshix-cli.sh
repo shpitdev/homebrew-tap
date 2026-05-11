@@ -16,7 +16,7 @@ fi
 
 repo_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 formula_path="${repo_root}/Formula/meshix-cli.rb"
-repo="shpitdev/meshix-observability"
+repo="shpitdev/meshix-mono"
 requested_version="${MESHIX_CLI_VERSION:-latest}"
 
 verify_sha256() {
@@ -39,18 +39,31 @@ verify_sha256() {
   fi
 }
 
+normalize_release_tag() {
+  local version="$1"
+
+  if [[ -z "${version}" || "${version}" == "latest" ]]; then
+    printf 'latest'
+    return 0
+  fi
+
+  version="${version#meshix-cli-}"
+  version="${version#v}"
+  printf 'meshix-cli-v%s' "${version}"
+}
+
 resolve_release_json() {
   local version="$1"
   local endpoint
+  local release_tag
   local output=""
 
-  if [[ -z "${version}" || "${version}" == "latest" ]]; then
+  release_tag="$(normalize_release_tag "${version}")"
+
+  if [[ "${release_tag}" == "latest" ]]; then
     endpoint="repos/${repo}/releases/latest"
   else
-    if [[ "${version}" != v* ]]; then
-      version="v${version}"
-    fi
-    endpoint="repos/${repo}/releases/tags/${version}"
+    endpoint="repos/${repo}/releases/tags/${release_tag}"
   fi
 
   if [[ -n "${SHPIT_GH_TOKEN:-}" ]]; then
@@ -82,7 +95,9 @@ release_json="$(resolve_release_json "${requested_version}")"
 if [[ "${release_json}" == "__SKIP__" ]]; then
   exit 0
 fi
-version="$(jq -r '.tag_name | ltrimstr("v")' <<<"${release_json}")"
+tag_name="$(jq -r '.tag_name' <<<"${release_json}")"
+version="${tag_name#meshix-cli-v}"
+version="${version#v}"
 arm64_json="$(jq -c '
   .assets
   | map(select(.name | test("_darwin_arm64\\.tar\\.gz$")))
@@ -117,17 +132,17 @@ tmpdir="$(mktemp -d)"
 trap 'rm -rf "${tmpdir}"' EXIT
 
 if [[ -n "${SHPIT_GH_TOKEN:-}" ]]; then
-  GH_TOKEN="${SHPIT_GH_TOKEN}" gh release download "v${version}" --repo "${repo}" \
+  GH_TOKEN="${SHPIT_GH_TOKEN}" gh release download "${tag_name}" --repo "${repo}" \
     --pattern "${arm64_asset}" --dir "${tmpdir}" --clobber >/dev/null
 else
-  gh release download "v${version}" --repo "${repo}" \
+  gh release download "${tag_name}" --repo "${repo}" \
     --pattern "${arm64_asset}" --dir "${tmpdir}" --clobber >/dev/null
 fi
 
 (
   cd "${tmpdir}"
   verify_sha256 "${arm64_sha}" "${arm64_asset}"
-  tar -tzf "${arm64_asset}" | grep -qx "meshix-cli_v${version}_darwin_arm64/meshix-cli"
+  tar -tzf "${arm64_asset}" | grep -qx "${arm64_asset%.tar.gz}/meshix-cli"
 )
 
 cat > "${formula_path}" <<EOF
@@ -197,7 +212,7 @@ end
 
 class MeshixCli < Formula
   desc "Meshix CLI for run inspection and generation workflows"
-  homepage "https://github.com/shpitdev/meshix-observability"
+  homepage "https://github.com/shpitdev/meshix-mono"
   version "${version}"
   license :cannot_represent
   depends_on arch: :arm64
@@ -228,7 +243,7 @@ class MeshixCli < Formula
   test do
     output = shell_output("#{bin}/meshix-cli --help")
     assert_match "meshix-cli", output
-    assert_match "architecture", output
+    assert_match "generate", output
   end
 end
 EOF
