@@ -65,16 +65,16 @@ end
 class Osyrra < Formula
   desc "Osyrra silent email worker and operator TUI"
   homepage "https://github.com/shpitdev/osyrra"
-  version "0.0.14"
+  version "0.0.16"
   license :cannot_represent
   depends_on arch: :arm64
 
   on_macos do
     on_arm do
-      url "https://api.github.com/repos/shpitdev/osyrra/releases/assets/417231933",
+      url "https://api.github.com/repos/shpitdev/osyrra/releases/assets/424061951",
           using: OsyrraGitHubReleaseDownloadStrategy,
-          resolved_basename: "osyrra_v0.0.14_darwin_arm64.tar.gz"
-      sha256 "426ba44f52a3f758ca7b5bfcd471fa7f7d9baf43d55d4b27693291fa7638f4b9"
+          resolved_basename: "osyrra_v0.0.16_darwin_arm64.tar.gz"
+      sha256 "62d0bb36119c832c3699ccfc9354c16cec7ba6cb3bc367338f29e2ad658572b5"
     end
   end
 
