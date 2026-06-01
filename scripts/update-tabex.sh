@@ -203,7 +203,7 @@ class Tabex < Formula
     assert_equal "tabex <command>", payload["usage"]
     assert_equal "v#{version}", payload["version"]
     assert_equal "docs/curated-e2e-examples.md", payload["curatedExamplesDoc"]
-    assert_equal "setup", payload["examples"].first["label"]
+    assert_equal "setup", payload["startHere"].first["command"]
   end
 end
 EOF
