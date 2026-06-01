@@ -15,6 +15,7 @@ if [[ -f "${tabex_formula}" ]]; then
   grep -q 'url "https://api.github.com/repos/shpitdev/tabex/releases/assets/' "${tabex_formula}"
   grep -q 'shell_output("#{bin}/tabex --json")' "${tabex_formula}"
   grep -q 'assert_equal "v#{version}", payload\["version"\]' "${tabex_formula}"
+  grep -q 'assert_equal "setup", payload\["startHere"\].first\["command"\]' "${tabex_formula}"
   grep -q 'Tabex needs browser-profile and extension setup after install.' "${tabex_formula}"
   grep -q 'tabex setup' "${tabex_formula}"
 fi
