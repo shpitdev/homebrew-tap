@@ -30,6 +30,22 @@ if [[ -f "${meshix_formula}" ]]; then
   grep -q 'meshix-cli-dev' "${meshix_formula}"
 fi
 
+foundry_formula="${repo_root}/Formula/foundry-cli.rb"
+if [[ -f "${foundry_formula}" ]]; then
+  grep -q 'class FoundryCli < Formula' "${foundry_formula}"
+  grep -q 'using: FoundryCliGitHubReleaseDownloadStrategy' "${foundry_formula}"
+  grep -q 'resolved_basename: "foundry-cli_' "${foundry_formula}"
+  grep -q 'url "https://api.github.com/repos/shpitdev/foundry-cli/releases/assets/' "${foundry_formula}"
+  grep -q 'bin.install_symlink libexec/"foundry-cli"' "${foundry_formula}"
+  grep -q 'shell_output("#{bin}/foundry-cli version")' "${foundry_formula}"
+  grep -q 'version "0.0.30"' "${foundry_formula}"
+  grep -q 'releases/assets/468862204' "${foundry_formula}"
+  grep -q 'sha256 "1707fba1d52a7203d442ed21d751535535bd706c85c367f8fffc93399a7f9181"' "${foundry_formula}"
+  grep -q 'releases/assets/468862181' "${foundry_formula}"
+  grep -q 'sha256 "7a960f0d58f1d5da2d61f4bde0725d443bcbaa15b7b659b8c3b0d3fdbfcbbda1"' "${foundry_formula}"
+  grep -q 'license :cannot_represent' "${foundry_formula}"
+fi
+
 osyrra_formula="${repo_root}/Formula/osyrra.rb"
 if [[ -f "${osyrra_formula}" ]]; then
   grep -q 'using: OsyrraGitHubReleaseDownloadStrategy' "${osyrra_formula}"
@@ -51,3 +67,5 @@ cp -a "${repo_root}/." "${tmpdir}/repo"
 )
 
 diff -ru "${repo_root}/Formula" "${tmpdir}/repo/Formula"
+
+"${repo_root}/scripts/test-update-foundry-cli.sh"
