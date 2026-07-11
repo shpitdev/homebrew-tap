@@ -9,7 +9,7 @@ Use this first.
 3. In `Settings -> Actions -> General`:
    - set workflow permissions to `Read and write`
    - enable `Allow GitHub Actions to create and approve pull requests`
-4. Attach the `SHPIT_GH_TOKEN` secret to `homebrew-tap` so private SHPIT formulae can update automatically.
+4. Attach the `SHPIT_GH_TOKEN` secret to `homebrew-tap` so private SHPIT formulae, including `foundry-cli`, can update automatically.
 5. Run the `version-bumps` workflow manually.
 
 Result:
@@ -17,7 +17,7 @@ Result:
 - branch and PR creation use the repo `GITHUB_TOKEN`
 - private SHPIT formula refreshes work only if the repo can read `SHPIT_GH_TOKEN`
 - there is no separate publish workflow because the tap repo itself is the distribution surface
-- upstream `meshix-observability`, `tabex`, and `osyrra` release workflows can also trigger this workflow automatically with `gh workflow run version-bumps.yml`, but that depends on `SHPIT_WORKFLOW_DISPATCH_TOKEN` being available in their producer-repo Depot CI secrets
+- upstream `foundry-cli`, `meshix-observability`, `tabex`, and `osyrra` release workflows can also trigger this workflow automatically with `gh workflow run version-bumps.yml`; `foundry-cli` may pass `-f foundry_cli_release_tag="${RELEASE_TAG}"` to pin the release being propagated
 
 ## GitHub UI Links
 
@@ -27,7 +27,7 @@ Result:
 
 ## SHPIT_GH_TOKEN
 
-Create the secret (org-level or repo-level) with access to read private releases on `shpitdev/meshix-observability`, `shpitdev/tabex`, and `shpitdev/osyrra`. An org-level secret with `selected` visibility works well if you consume it from multiple repos.
+Create the secret (org-level or repo-level) with access to read private releases on `shpitdev/foundry-cli`, `shpitdev/meshix-observability`, `shpitdev/tabex`, and `shpitdev/osyrra`. An org-level secret with `selected` visibility works well if you consume it from multiple repos.
 
 Attach it to this repo with:
 
@@ -47,6 +47,7 @@ Create a fine-grained PAT that can trigger workflow dispatches in:
 
 Store that PAT as the GitHub org secret `SHPIT_WORKFLOW_DISPATCH_TOKEN` with `selected` visibility for these producer repos:
 
+- `shpitdev/foundry-cli`
 - `shpitdev/meshix-observability`
 - `shpitdev/tabex`
 - `shpitdev/osyrra`
@@ -83,7 +84,7 @@ If you are logged into GitHub locally with `gh auth login`, you can run:
 
 That uses your local GitHub CLI session for private release access.
 
-For local installs, all three SHPIT formulae (`meshix-cli`, `tabex`, and `osyrra`) use the same private-auth path:
+For local installs, all four SHPIT formulae (`foundry-cli`, `meshix-cli`, `tabex`, and `osyrra`) use the same private-auth path:
 
 - they first check `HOMEBREW_GITHUB_API_TOKEN`, `GH_TOKEN`, and `GITHUB_TOKEN`
 - if none of those are set, they fall back to `gh auth token`
@@ -100,13 +101,13 @@ That is intentional. `v0.0.4` is the first stable release that ships the source-
 
 ## Package-Manager Install Behavior
 
-All three current SHPIT formulae use install-side GitHub auth:
+All four current SHPIT formulae use install-side GitHub auth:
 
 - they check `HOMEBREW_GITHUB_API_TOKEN`, `GH_TOKEN`, and `GITHUB_TOKEN`
 - if no standard token env var is present, they fall back to `gh auth token`
 - `SHPIT_GH_TOKEN` remains supported as a final SHPIT automation fallback
 
-All current SHPIT formulae are macOS arm64 only today. An Intel Mac install will fail with an architecture guard until the upstream release adds a `darwin_amd64` asset and the relevant formula gains an `on_intel` block.
+`foundry-cli` supports both macOS arm64 and amd64. The other current SHPIT formulae are macOS arm64 only today.
 
 ## Recommended Follow-Up
 

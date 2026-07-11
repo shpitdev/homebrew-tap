@@ -8,6 +8,7 @@ This repo is the tap source of truth. Formulae are updated by repo-owned scripts
 
 | Formula | Upstream | Notes |
 |---|---|---|
+| `foundry-cli` | `shpitdev/foundry-cli` GitHub Releases | Private darwin arm64 and amd64 release assets fetched through the GitHub Releases API, with release-provided SHA-256 digests verified before formula generation. Uses the standard tap authentication path. |
 | `meshix-cli` | `shpitdev/meshix-observability` GitHub Releases | Private darwin arm64 release asset fetched through the GitHub Releases API. The formula first checks `HOMEBREW_GITHUB_API_TOKEN`, `GH_TOKEN`, and `GITHUB_TOKEN`, then falls back to `gh auth token`, and only then checks `SHPIT_GH_TOKEN` for SHPIT automation environments. |
 | `tabex` | `shpitdev/tabex` GitHub Releases | Private darwin arm64 release asset fetched through the GitHub Releases API. The formula first checks `HOMEBREW_GITHUB_API_TOKEN`, `GH_TOKEN`, and `GITHUB_TOKEN`, then falls back to `gh auth token`, and only then checks `SHPIT_GH_TOKEN` for SHPIT automation environments. |
 | `osyrra` | `shpitdev/osyrra` GitHub Releases | Private darwin arm64 release asset fetched through the GitHub Releases API. Same auth path as `tabex`. |
@@ -23,6 +24,7 @@ Once the GitHub repo exists as `shpitdev/homebrew-tap`:
 
 ```bash
 brew tap shpitdev/tap
+brew install shpitdev/tap/foundry-cli
 brew install shpitdev/tap/meshix-cli
 brew install shpitdev/tap/tabex
 brew install shpitdev/tap/osyrra
@@ -32,6 +34,7 @@ If `gh` is not installed or not logged in locally, run installs with an explicit
 
 ```bash
 HOMEBREW_GITHUB_API_TOKEN="$(gh auth token)" brew install shpitdev/tap/meshix-cli
+HOMEBREW_GITHUB_API_TOKEN="$(gh auth token)" brew install shpitdev/tap/foundry-cli
 HOMEBREW_GITHUB_API_TOKEN="$(gh auth token)" brew install shpitdev/tap/tabex
 HOMEBREW_GITHUB_API_TOKEN="$(gh auth token)" brew install shpitdev/tap/osyrra
 ```
@@ -46,8 +49,8 @@ That saves browser config, installs or updates the managed Chrome extension loca
 
 ## Current Limitation
 
-- All current formulae are macOS arm64 only. The upstream releases do not ship a `darwin_amd64` asset today; add one upstream and the updater scripts can gain an `on_intel` block where appropriate.
-- `meshix-cli`, `tabex`, and `osyrra` currently come from private upstream repos, so these install paths remain SHPIT-internal until their release assets become public.
+- `meshix-cli`, `tabex`, and `osyrra` are macOS arm64 only. `foundry-cli` also supports macOS Intel.
+- `foundry-cli`, `meshix-cli`, `tabex`, and `osyrra` currently come from private upstream repos, so these install paths remain SHPIT-internal until their release assets become public.
 - Automation reads those private releases with the `SHPIT_GH_TOKEN` secret, but local installs should usually rely on your logged-in `gh` session or one of the standard Homebrew GitHub token env vars.
 
 ## Local Usage

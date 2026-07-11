@@ -6,6 +6,9 @@ on:
       meshix_cli_version:
         description: Optional Meshix CLI release tag to pin for this run (for example v0.0.2)
         required: false
+      foundry_cli_release_tag:
+        description: Optional foundry-cli release tag to pin for this run (for example v0.0.30)
+        required: false
   schedule:
     - cron: '41 6 * * *'
 
@@ -20,6 +23,7 @@ jobs:
       GH_TOKEN: ${{ github.token }}
       SHPIT_GH_TOKEN: ${{ secrets.SHPIT_GH_TOKEN }}
       MESHIX_CLI_VERSION: ${{ github.event.inputs.meshix_cli_version || '' }}
+      FOUNDRY_CLI_RELEASE_TAG: ${{ github.event.inputs.foundry_cli_release_tag || '' }}
       UPDATE_BRANCH: automation/version-bumps
     steps:
       - name: Checkout
