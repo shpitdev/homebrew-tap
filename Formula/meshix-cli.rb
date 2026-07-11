@@ -65,16 +65,16 @@ end
 class MeshixCli < Formula
   desc "Meshix CLI for run inspection and generation workflows"
   homepage "https://github.com/shpitdev/meshix-mono"
-  version "0.0.20"
+  version "0.0.21"
   license :cannot_represent
   depends_on arch: :arm64
 
   on_macos do
     on_arm do
-      url "https://api.github.com/repos/shpitdev/meshix-mono/releases/assets/457817515",
+      url "https://api.github.com/repos/shpitdev/meshix-mono/releases/assets/462917633",
           using: MeshixCliGitHubReleaseDownloadStrategy,
-          resolved_basename: "meshix-cli_v0.0.20_darwin_arm64.tar.gz"
-      sha256 "7471d79fa8c77997ef64a8e09cf1b132be3ef0cb0a0e2c2c1cf6c1a9e689702a"
+          resolved_basename: "meshix-cli_v0.0.21_darwin_arm64.tar.gz"
+      sha256 "4a27e3aa38a56f5ea3e269e937fad47a73ac9ca84bd83c9e02d71747cb7ac9e7"
     end
   end
 
