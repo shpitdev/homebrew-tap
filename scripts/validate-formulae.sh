@@ -25,8 +25,11 @@ if [[ -f "${meshix_formula}" ]]; then
   grep -q 'using: MeshixCliGitHubReleaseDownloadStrategy' "${meshix_formula}"
   grep -q 'resolved_basename: "meshix-cli_v' "${meshix_formula}"
   grep -q 'url "https://api.github.com/repos/shpitdev/meshix-mono/releases/assets/' "${meshix_formula}"
+  grep -q 'depends_on "node@24"' "${meshix_formula}"
+  grep -q 'bin.env_script_all_files(libexec, PATH: "#{Formula\["node@24"\].opt_bin}:\$PATH")' "${meshix_formula}"
   grep -q 'bin.install "meshix-cli"' "${meshix_formula}"
   grep -q 'meshix-cli --help' "${meshix_formula}"
+  grep -q 'assert_equal "typescript", payload\["runtime"\]' "${meshix_formula}"
   grep -q 'meshix-cli-dev' "${meshix_formula}"
 fi
 

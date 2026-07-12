@@ -216,6 +216,7 @@ class MeshixCli < Formula
   version "${version}"
   license :cannot_represent
   depends_on arch: :arm64
+  depends_on "node@24"
 
   on_macos do
     on_arm do
@@ -228,11 +229,12 @@ class MeshixCli < Formula
 
   def install
     bin.install "meshix-cli"
+    bin.env_script_all_files(libexec, PATH: "#{Formula["node@24"].opt_bin}:\$PATH")
   end
 
   def caveats
     <<~EOS
-      Package-manager installs provide the stable meshix-cli command only.
+      Package-manager installs provide the released meshix-cli command only.
       Start with:
         meshix-cli --help
 
@@ -244,6 +246,10 @@ class MeshixCli < Formula
     output = shell_output("#{bin}/meshix-cli --help")
     assert_match "meshix-cli", output
     assert_match "generate", output
+
+    payload = JSON.parse(shell_output("#{bin}/meshix-cli version --json"))
+    assert_equal "typescript", payload["runtime"]
+    assert_equal version.to_s, payload["version"]
   end
 end
 EOF
