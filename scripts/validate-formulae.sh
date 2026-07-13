@@ -35,17 +35,27 @@ fi
 
 foundry_formula="${repo_root}/Formula/foundry-cli.rb"
 if [[ -f "${foundry_formula}" ]]; then
+  expected_foundry_version="0.0.31"
+  expected_foundry_arm64_asset_id="476012067"
+  expected_foundry_arm64_basename="foundry-cli_0.0.31_darwin_arm64.tar.gz"
+  expected_foundry_arm64_sha="b7ccc08293d098a5ec6ddbe581099ad27610540e0593224a5bc4462fca3aaeb7"
+  expected_foundry_amd64_asset_id="476012073"
+  expected_foundry_amd64_basename="foundry-cli_0.0.31_darwin_amd64.tar.gz"
+  expected_foundry_amd64_sha="0f5bead326e530c1379ae39f27c765a12b1f801a1d006c1e3e0515fe8460e5f2"
+
   grep -q 'class FoundryCli < Formula' "${foundry_formula}"
   grep -q 'using: FoundryCliGitHubReleaseDownloadStrategy' "${foundry_formula}"
   grep -q 'resolved_basename: "foundry-cli_' "${foundry_formula}"
   grep -q 'url "https://api.github.com/repos/shpitdev/foundry-cli/releases/assets/' "${foundry_formula}"
   grep -q 'bin.install_symlink libexec/"foundry-cli"' "${foundry_formula}"
   grep -q 'shell_output("#{bin}/foundry-cli version")' "${foundry_formula}"
-  grep -q 'version "0.0.30"' "${foundry_formula}"
-  grep -q 'releases/assets/468862204' "${foundry_formula}"
-  grep -q 'sha256 "1707fba1d52a7203d442ed21d751535535bd706c85c367f8fffc93399a7f9181"' "${foundry_formula}"
-  grep -q 'releases/assets/468862181' "${foundry_formula}"
-  grep -q 'sha256 "7a960f0d58f1d5da2d61f4bde0725d443bcbaa15b7b659b8c3b0d3fdbfcbbda1"' "${foundry_formula}"
+  grep -Fq "version \"${expected_foundry_version}\"" "${foundry_formula}"
+  grep -Fq "releases/assets/${expected_foundry_arm64_asset_id}" "${foundry_formula}"
+  grep -Fq "resolved_basename: \"${expected_foundry_arm64_basename}\"" "${foundry_formula}"
+  grep -Fq "sha256 \"${expected_foundry_arm64_sha}\"" "${foundry_formula}"
+  grep -Fq "releases/assets/${expected_foundry_amd64_asset_id}" "${foundry_formula}"
+  grep -Fq "resolved_basename: \"${expected_foundry_amd64_basename}\"" "${foundry_formula}"
+  grep -Fq "sha256 \"${expected_foundry_amd64_sha}\"" "${foundry_formula}"
   grep -q 'license :cannot_represent' "${foundry_formula}"
 fi
 
@@ -70,5 +80,6 @@ cp -a "${repo_root}/." "${tmpdir}/repo"
 )
 
 diff -ru "${repo_root}/Formula" "${tmpdir}/repo/Formula"
+diff -u "${repo_root}/scripts/validate-formulae.sh" "${tmpdir}/repo/scripts/validate-formulae.sh"
 
 "${repo_root}/scripts/test-update-foundry-cli.sh"

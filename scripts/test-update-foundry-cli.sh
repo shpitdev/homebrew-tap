@@ -8,6 +8,7 @@ trap 'rm -rf "${test_root}"' EXIT
 mkdir -p "${test_root}/repo/Formula" "${test_root}/repo/scripts" "${test_root}/bin" "${test_root}/archives"
 cp "${repo_root}/Formula/foundry-cli.rb" "${test_root}/repo/Formula/foundry-cli.rb"
 cp "${repo_root}/scripts/update-foundry-cli.sh" "${test_root}/repo/scripts/update-foundry-cli.sh"
+cp "${repo_root}/scripts/validate-formulae.sh" "${test_root}/repo/scripts/validate-formulae.sh"
 
 cat > "${test_root}/bin/gh" <<'EOF'
 #!/usr/bin/env bash
@@ -168,10 +169,19 @@ grep -Fq "sha256 \"${amd64_sha}\"" "${generated_formula}"
 grep -Fq 'releases/assets/102' "${generated_formula}"
 grep -Fq "sha256 \"${arm64_sha}\"" "${generated_formula}"
 
+generated_validator="${test_root}/repo/scripts/validate-formulae.sh"
+grep -Fq 'expected_foundry_version="9.9.9"' "${generated_validator}"
+grep -Fq 'expected_foundry_arm64_asset_id="102"' "${generated_validator}"
+grep -Fq "expected_foundry_arm64_basename=\"${arm64_asset}\"" "${generated_validator}"
+grep -Fq "expected_foundry_arm64_sha=\"${arm64_sha}\"" "${generated_validator}"
+grep -Fq 'expected_foundry_amd64_asset_id="101"' "${generated_validator}"
+grep -Fq "expected_foundry_amd64_basename=\"${amd64_asset}\"" "${generated_validator}"
+grep -Fq "expected_foundry_amd64_sha=\"${amd64_sha}\"" "${generated_validator}"
+
 seed_formula="${repo_root}/Formula/foundry-cli.rb"
-grep -Fq 'version "0.0.30"' "${seed_formula}"
-grep -Fq 'releases/assets/468862204' "${seed_formula}"
-grep -Fq 'sha256 "1707fba1d52a7203d442ed21d751535535bd706c85c367f8fffc93399a7f9181"' "${seed_formula}"
-grep -Fq 'releases/assets/468862181' "${seed_formula}"
-grep -Fq 'sha256 "7a960f0d58f1d5da2d61f4bde0725d443bcbaa15b7b659b8c3b0d3fdbfcbbda1"' "${seed_formula}"
+grep -Fq 'version "0.0.31"' "${seed_formula}"
+grep -Fq 'releases/assets/476012067' "${seed_formula}"
+grep -Fq 'sha256 "b7ccc08293d098a5ec6ddbe581099ad27610540e0593224a5bc4462fca3aaeb7"' "${seed_formula}"
+grep -Fq 'releases/assets/476012073' "${seed_formula}"
+grep -Fq 'sha256 "0f5bead326e530c1379ae39f27c765a12b1f801a1d006c1e3e0515fe8460e5f2"' "${seed_formula}"
 grep -Fq 'license :cannot_represent' "${seed_formula}"

@@ -16,6 +16,7 @@ fi
 
 repo_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 formula_path="${repo_root}/Formula/foundry-cli.rb"
+validator_path="${repo_root}/scripts/validate-formulae.sh"
 repo="shpitdev/foundry-cli"
 asset_prefix="foundry-cli"
 release_tag="${FOUNDRY_CLI_RELEASE_TAG:-}"
@@ -306,3 +307,58 @@ class FoundryCli < Formula
   end
 end
 EOF
+
+validator_tmp="${tmpdir}/validate-formulae.sh"
+awk \
+  -v version="${version}" \
+  -v arm64_asset_id="${arm64_api_url##*/}" \
+  -v arm64_basename="${arm64_asset}" \
+  -v arm64_sha="${arm64_sha}" \
+  -v amd64_asset_id="${amd64_api_url##*/}" \
+  -v amd64_basename="${amd64_asset}" \
+  -v amd64_sha="${amd64_sha}" '
+  /^  expected_foundry_version=/ {
+    print "  expected_foundry_version=\"" version "\""
+    updated++
+    next
+  }
+  /^  expected_foundry_arm64_asset_id=/ {
+    print "  expected_foundry_arm64_asset_id=\"" arm64_asset_id "\""
+    updated++
+    next
+  }
+  /^  expected_foundry_arm64_basename=/ {
+    print "  expected_foundry_arm64_basename=\"" arm64_basename "\""
+    updated++
+    next
+  }
+  /^  expected_foundry_arm64_sha=/ {
+    print "  expected_foundry_arm64_sha=\"" arm64_sha "\""
+    updated++
+    next
+  }
+  /^  expected_foundry_amd64_asset_id=/ {
+    print "  expected_foundry_amd64_asset_id=\"" amd64_asset_id "\""
+    updated++
+    next
+  }
+  /^  expected_foundry_amd64_basename=/ {
+    print "  expected_foundry_amd64_basename=\"" amd64_basename "\""
+    updated++
+    next
+  }
+  /^  expected_foundry_amd64_sha=/ {
+    print "  expected_foundry_amd64_sha=\"" amd64_sha "\""
+    updated++
+    next
+  }
+  { print }
+  END {
+    if (updated != 7) {
+      print "Unable to update foundry-cli validator expectations." > "/dev/stderr"
+      exit 1
+    }
+  }
+' "${validator_path}" > "${validator_tmp}"
+chmod +x "${validator_tmp}"
+mv "${validator_tmp}" "${validator_path}"
