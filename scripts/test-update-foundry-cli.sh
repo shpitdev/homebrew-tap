@@ -87,6 +87,9 @@ sha256_file() {
   fi
 }
 
+seed_formula="${repo_root}/Formula/foundry-cli.rb"
+seed_formula_sha_before="$(sha256_file "${seed_formula}")"
+
 assert_fails "an explicit missing tag must not be hidden by --optional" \
   env "${common_env[@]}" MOCK_API_FAIL=true FOUNDRY_CLI_RELEASE_TAG=v-does-not-exist \
   "${updater}" --optional
@@ -178,10 +181,9 @@ grep -Fq 'expected_foundry_amd64_asset_id="101"' "${generated_validator}"
 grep -Fq "expected_foundry_amd64_basename=\"${amd64_asset}\"" "${generated_validator}"
 grep -Fq "expected_foundry_amd64_sha=\"${amd64_sha}\"" "${generated_validator}"
 
-seed_formula="${repo_root}/Formula/foundry-cli.rb"
-grep -Fq 'version "0.0.31"' "${seed_formula}"
-grep -Fq 'releases/assets/476012067' "${seed_formula}"
-grep -Fq 'sha256 "b7ccc08293d098a5ec6ddbe581099ad27610540e0593224a5bc4462fca3aaeb7"' "${seed_formula}"
-grep -Fq 'releases/assets/476012073' "${seed_formula}"
-grep -Fq 'sha256 "0f5bead326e530c1379ae39f27c765a12b1f801a1d006c1e3e0515fe8460e5f2"' "${seed_formula}"
+seed_formula_sha_after="$(sha256_file "${seed_formula}")"
+if [[ "${seed_formula_sha_after}" != "${seed_formula_sha_before}" ]]; then
+  echo "The updater regression test modified the checked-out seed formula" >&2
+  exit 1
+fi
 grep -Fq 'license :cannot_represent' "${seed_formula}"
