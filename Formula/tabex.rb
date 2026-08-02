@@ -1,80 +1,14 @@
-class TabexGitHubReleaseDownloadStrategy < CurlDownloadStrategy
-  def initialize(url, name, version, **meta)
-    @resolved_basename = meta.delete(:resolved_basename)
-    @github_token = resolve_github_token
-
-    if @github_token.nil? || @github_token.empty?
-      raise CurlDownloadStrategyError.new(
-        url,
-        [
-          "GitHub authentication is required to download the private tabex release asset.",
-          "Set HOMEBREW_GITHUB_API_TOKEN, GH_TOKEN, or GITHUB_TOKEN,",
-          "or log in with gh auth login. SHPIT_GH_TOKEN is also supported for SHPIT automation."
-        ].join(" ")
-      )
-    end
-
-    meta[:headers] ||= []
-    meta[:headers] << "Accept: application/octet-stream"
-    meta[:headers] << "Authorization: Bearer #{@github_token}"
-    super
-  end
-
-  private
-
-  def resolve_github_token
-    %w[HOMEBREW_GITHUB_API_TOKEN GH_TOKEN GITHUB_TOKEN].each do |key|
-      value = ENV[key]&.strip
-      return value unless value.nil? || value.empty?
-    end
-
-    [
-      "#{HOMEBREW_PREFIX}/bin/gh",
-      "/opt/homebrew/bin/gh",
-      "/usr/local/bin/gh",
-      "gh"
-    ].uniq.each do |gh|
-      next if gh != "gh" && !File.executable?(gh)
-
-      value = Utils.safe_popen_read(gh, "auth", "token").strip
-      return value unless value.empty?
-    rescue ErrorDuringExecution, Errno::ENOENT
-      next
-    end
-
-    value = ENV["SHPIT_GH_TOKEN"]&.strip
-    return value unless value.nil? || value.empty?
-
-    nil
-  end
-
-  def resolve_url_basename_time_file_size(url, timeout: nil)
-    resolved_url, _, last_modified, file_size, content_type, is_redirection = super
-    [resolved_url, @resolved_basename, last_modified, file_size, content_type, is_redirection]
-  end
-
-  def curl_output(*args, **options)
-    super(*args, secrets: [@github_token], **options)
-  end
-
-  def curl(*args, print_stdout: true, **options)
-    super(*args, print_stdout: print_stdout, secrets: [@github_token], **options)
-  end
-end
-
 class Tabex < Formula
   desc "Tabex CLI for browser session, capture, and page inspection"
   homepage "https://github.com/shpitdev/tabex"
-  version "0.0.11"
+  version "0.0.12"
   license :cannot_represent
   depends_on arch: :arm64
 
   on_macos do
     on_arm do
-      url "https://api.github.com/repos/shpitdev/tabex/releases/assets/492463091",
-          using: TabexGitHubReleaseDownloadStrategy,
-          resolved_basename: "tabex_v0.0.11_darwin_arm64.tar.gz"
-      sha256 "2d0c6446e1a1e37dd17cb3744a05645195798b29d09fce80bcb91bcfc3231066"
+      url "https://github.com/shpitdev/pkgbuilds/releases/download/tabex-v0.0.12/tabex_v0.0.12_darwin_arm64.tar.gz"
+      sha256 "5936bc2070fffd15015b8e97dc3a6fb7c60b405d3350d30cbe63d7ceb5202cb7"
     end
   end
 
