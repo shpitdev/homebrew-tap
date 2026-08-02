@@ -10,9 +10,6 @@ done
 
 tabex_formula="${repo_root}/Formula/tabex.rb"
 if [[ -f "${tabex_formula}" ]]; then
-  grep -q 'using: TabexGitHubReleaseDownloadStrategy' "${tabex_formula}"
-  grep -q 'resolved_basename: "tabex_v' "${tabex_formula}"
-  grep -q 'url "https://api.github.com/repos/shpitdev/tabex/releases/assets/' "${tabex_formula}"
   grep -q 'shell_output("#{bin}/tabex --json")' "${tabex_formula}"
   grep -q 'assert_equal "v#{version}", payload\["version"\]' "${tabex_formula}"
   grep -q 'assert_equal "setup", payload\["startHere"\].first\["command"\]' "${tabex_formula}"
@@ -83,3 +80,4 @@ diff -ru "${repo_root}/Formula" "${tmpdir}/repo/Formula"
 diff -u "${repo_root}/scripts/validate-formulae.sh" "${tmpdir}/repo/scripts/validate-formulae.sh"
 
 "${repo_root}/scripts/test-update-foundry-cli.sh"
+"${repo_root}/scripts/test-update-tabex.sh"
