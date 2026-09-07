@@ -70,6 +70,9 @@ formula="${workdir}/repo/Formula/tabex.rb"
 ruby -c "${formula}" >/dev/null
 grep -Fq 'version "9.8.7"' "${formula}"
 grep -Fq 'url "https://github.com/shpitdev/pkgbuilds/releases/download/tabex-v9.8.7/tabex_v9.8.7_darwin_arm64.tar.gz"' "${formula}"
+grep -Fq 'Install Tabex from the Chrome Web Store' "${formula}"
+grep -Fq 'tabex browser native-host install' "${formula}"
+grep -Fq 'tabex browser native-host status' "${formula}"
 if grep -Eq 'GitHubReleaseDownloadStrategy|Authorization: Bearer|api.github.com/repos/shpitdev/tabex' "${formula}"; then
   echo "Generated Tabex formula still requires private GitHub access." >&2
   exit 1

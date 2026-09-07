@@ -1,14 +1,14 @@
 class Tabex < Formula
   desc "Tabex CLI for browser session, capture, and page inspection"
   homepage "https://github.com/shpitdev/tabex"
-  version "0.0.13"
+  version "0.0.15"
   license :cannot_represent
   depends_on arch: :arm64
 
   on_macos do
     on_arm do
-      url "https://github.com/shpitdev/pkgbuilds/releases/download/tabex-v0.0.13/tabex_v0.0.13_darwin_arm64.tar.gz"
-      sha256 "8d1deca69db23d997aa8f35d16311d1ba901ef5f99ea253c747046ebea074ed7"
+      url "https://github.com/shpitdev/pkgbuilds/releases/download/tabex-v0.0.15/tabex_v0.0.15_darwin_arm64.tar.gz"
+      sha256 "391fcec152edb5f3acd5cb6a9a7aeee9a9dba0f3a20db28d21d1a73749fe3564"
     end
   end
 
@@ -22,8 +22,10 @@ class Tabex < Formula
       Start with:
         tabex setup
 
-      That saves browser config, installs or updates the managed Chrome extension locally,
-      and prints the Chrome load or refresh steps.
+      Install Tabex from the Chrome Web Store, then register and verify the
+      local native enrollment host:
+        tabex browser native-host install
+        tabex browser native-host status
     EOS
   end
 

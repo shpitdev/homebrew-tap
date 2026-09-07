@@ -15,6 +15,9 @@ if [[ -f "${tabex_formula}" ]]; then
   grep -q 'assert_equal "setup", payload\["startHere"\].first\["command"\]' "${tabex_formula}"
   grep -q 'Tabex needs browser-profile and extension setup after install.' "${tabex_formula}"
   grep -q 'tabex setup' "${tabex_formula}"
+  grep -q 'Install Tabex from the Chrome Web Store' "${tabex_formula}"
+  grep -q 'tabex browser native-host install' "${tabex_formula}"
+  grep -q 'tabex browser native-host status' "${tabex_formula}"
 fi
 
 meshix_formula="${repo_root}/Formula/meshix-cli.rb"
