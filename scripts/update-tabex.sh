@@ -128,8 +128,10 @@ class Tabex < Formula
       Start with:
         tabex setup
 
-      That saves browser config, installs or updates the managed Chrome extension locally,
-      and prints the Chrome load or refresh steps.
+      Install Tabex from the Chrome Web Store, then register and verify the
+      local native enrollment host:
+        tabex browser native-host install
+        tabex browser native-host status
     EOS
   end
 
