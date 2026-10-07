@@ -65,22 +65,22 @@ end
 class FoundryCli < Formula
   desc "Foundry DevOps automation CLI"
   homepage "https://github.com/shpitdev/foundry-cli"
-  version "0.0.53"
+  version "0.0.54"
   license :cannot_represent
 
   on_macos do
     on_arm do
-      url "https://api.github.com/repos/shpitdev/foundry-cli/releases/assets/617297211",
+      url "https://api.github.com/repos/shpitdev/foundry-cli/releases/assets/617841741",
           using: FoundryCliGitHubReleaseDownloadStrategy,
-          resolved_basename: "foundry-cli_0.0.53_darwin_arm64.tar.gz"
-      sha256 "84686a005234a5ddd083b3b5dc0037a6c21cd572b53bf46c97a65c7c43522d8c"
+          resolved_basename: "foundry-cli_0.0.54_darwin_arm64.tar.gz"
+      sha256 "3a163c6877dec4ff35460ce0aa04b52570a9394877885af23bb6c22f6e0ac0ff"
     end
 
     on_intel do
-      url "https://api.github.com/repos/shpitdev/foundry-cli/releases/assets/617297210",
+      url "https://api.github.com/repos/shpitdev/foundry-cli/releases/assets/617841749",
           using: FoundryCliGitHubReleaseDownloadStrategy,
-          resolved_basename: "foundry-cli_0.0.53_darwin_amd64.tar.gz"
-      sha256 "d3ab528193b66510916aa9fc6e14047da999b3532d715b67f2b62efad784ba4f"
+          resolved_basename: "foundry-cli_0.0.54_darwin_amd64.tar.gz"
+      sha256 "569c9f64e23e690f2eff5b83def58cf5f4d95e51ead2f66388c9c811a3277c25"
     end
   end
 
