@@ -10,7 +10,6 @@ fi
 if [[ "$1" == "auto" ]]; then
   formulae=(meshix-cli tabex)
   if [[ -n "${SHPIT_GH_TOKEN:-}" || -z "${GITHUB_ACTIONS:-}" ]]; then
-    formulae+=(foundry-cli)
     formulae+=(osyrra)
   fi
 elif [[ "$1" == "all" ]]; then

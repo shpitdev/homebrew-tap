@@ -26,6 +26,7 @@ if [[ -f "${meshix_formula}" ]]; then
   grep -q 'resolved_basename: "meshix-cli_v' "${meshix_formula}"
   grep -q 'url "https://api.github.com/repos/shpitdev/meshix-mono/releases/assets/' "${meshix_formula}"
   grep -q 'depends_on "node@24"' "${meshix_formula}"
+  # shellcheck disable=SC2016 # Match literal Ruby shell-environment setup.
   grep -q 'bin.env_script_all_files(libexec, PATH: "#{Formula\["node@24"\].opt_bin}:\$PATH")' "${meshix_formula}"
   grep -q 'bin.install "meshix-cli"' "${meshix_formula}"
   grep -q 'meshix-cli --help' "${meshix_formula}"
@@ -77,6 +78,7 @@ cp -a "${repo_root}/." "${tmpdir}/repo"
     export MESHIX_CLI_VERSION
   fi
   ./scripts/update-formulae.sh auto
+  FOUNDRY_CLI_RELEASE_TAG="v${expected_foundry_version}" ./scripts/update-foundry-cli.sh --optional
 )
 
 diff -ru "${repo_root}/Formula" "${tmpdir}/repo/Formula"
@@ -84,3 +86,5 @@ diff -u "${repo_root}/scripts/validate-formulae.sh" "${tmpdir}/repo/scripts/vali
 
 "${repo_root}/scripts/test-update-foundry-cli.sh"
 "${repo_root}/scripts/test-update-tabex.sh"
+
+"${repo_root}/scripts/bump-foundry-cli-release.test.sh"

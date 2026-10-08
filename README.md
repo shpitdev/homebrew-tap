@@ -15,7 +15,8 @@ This repo is the tap source of truth. Formulae are updated by repo-owned scripts
 
 ## Automation
 
-- `.github/workflows/version-bumps.yml` runs on a schedule or manual dispatch, refreshes formula versions/checksums, and opens or updates a PR.
+- `.github/workflows/version-bumps.yml` keeps non-Foundry packages in the scheduled rolling PR. Dispatching with `foundry_cli_release_tag=vX.Y.Z` updates only Foundry CLI on a dedicated branch, opens a PR, validates it in the job, and squash-merges it with `SHPIT_GH_TOKEN`. That token needs private release read access plus contents and pull-request write access in this repo.
+- Equal or older versions are no-ops. `dry_run=true` creates and validates a draft PR, including for an older tag, but never merges or publishes. Do not merge dry-run PRs. Validation failures leave the candidate PR open and the job red.
 - `.github/workflows/validate.yml` checks Ruby syntax and verifies that the generated formulae are in sync with the updater scripts.
 
 ## Usage
