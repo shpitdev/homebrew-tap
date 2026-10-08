@@ -9,6 +9,10 @@ on:
       foundry_cli_release_tag:
         description: Optional foundry-cli release tag to pin for this run (for example v0.0.30)
         required: false
+      dry_run:
+        description: Validate a Foundry CLI draft PR without merging or publishing (requires a tag)
+        type: boolean
+        default: false
   schedule:
     - cron: '41 6 * * *'
 
@@ -22,6 +26,7 @@ concurrency:
 
 jobs:
   update:
+    if: ${{ !inputs.foundry_cli_release_tag && !inputs.dry_run }}
     runs-on: ubuntu-latest
     env:
       GH_TOKEN: ${{ github.token }}
@@ -93,3 +98,28 @@ jobs:
               --title "${title}" \
               --body-file "${body_file}"
           fi
+
+  foundry-cli:
+    if: ${{ inputs.foundry_cli_release_tag != '' && github.ref == 'refs/heads/main' }}
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.SHPIT_GH_TOKEN }}
+      SHPIT_GH_TOKEN: ${{ secrets.SHPIT_GH_TOKEN }}
+      FOUNDRY_CLI_RELEASE_TAG: ${{ inputs.foundry_cli_release_tag }}
+      DRY_RUN: ${{ inputs.dry_run || false }}
+    steps:
+      - name: Checkout current main
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: main
+          fetch-depth: 0
+          token: ${{ secrets.SHPIT_GH_TOKEN }}
+      - name: Install dependencies
+        run: sudo apt-get update && sudo apt-get install --yes jq ruby
+      - name: Configure git
+        run: |
+          git config --global --add safe.directory "${GITHUB_WORKSPACE}"
+          git config user.name "shpit-bot"
+          git config user.email "opensource@shpit.dev"
+      - name: Update, validate, and merge Foundry CLI
+        run: ./scripts/bump-foundry-cli-release.sh
