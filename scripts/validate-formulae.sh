@@ -20,20 +20,6 @@ if [[ -f "${tabex_formula}" ]]; then
   grep -q 'tabex browser native-host status' "${tabex_formula}"
 fi
 
-meshix_formula="${repo_root}/Formula/meshix-cli.rb"
-if [[ -f "${meshix_formula}" ]]; then
-  grep -q 'using: MeshixCliGitHubReleaseDownloadStrategy' "${meshix_formula}"
-  grep -q 'resolved_basename: "meshix-cli_v' "${meshix_formula}"
-  grep -q 'url "https://api.github.com/repos/shpitdev/meshix-mono/releases/assets/' "${meshix_formula}"
-  grep -q 'depends_on "node@24"' "${meshix_formula}"
-  # shellcheck disable=SC2016 # Match literal Ruby shell-environment setup.
-  grep -q 'bin.env_script_all_files(libexec, PATH: "#{Formula\["node@24"\].opt_bin}:\$PATH")' "${meshix_formula}"
-  grep -q 'bin.install "meshix-cli"' "${meshix_formula}"
-  grep -q 'meshix-cli --help' "${meshix_formula}"
-  grep -q 'assert_equal "typescript", payload\["runtime"\]' "${meshix_formula}"
-  grep -q 'meshix-cli-dev' "${meshix_formula}"
-fi
-
 foundry_formula="${repo_root}/Formula/foundry-cli.rb"
 if [[ -f "${foundry_formula}" ]]; then
   expected_foundry_version="0.0.70"
@@ -73,10 +59,6 @@ trap 'rm -rf "${tmpdir}"' EXIT
 cp -a "${repo_root}/." "${tmpdir}/repo"
 (
   cd "${tmpdir}/repo"
-  if [[ -z "${MESHIX_CLI_VERSION:-}" && -f Formula/meshix-cli.rb ]]; then
-    MESHIX_CLI_VERSION="$(sed -n 's/^  version "\([^"]*\)"$/\1/p' Formula/meshix-cli.rb | head -n 1)"
-    export MESHIX_CLI_VERSION
-  fi
   ./scripts/update-formulae.sh auto
   FOUNDRY_CLI_RELEASE_TAG="v${expected_foundry_version}" ./scripts/update-foundry-cli.sh --optional
 )

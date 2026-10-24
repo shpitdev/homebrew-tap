@@ -9,9 +9,8 @@ This repo is the tap source of truth. Formulae are updated by repo-owned scripts
 | Formula | Upstream | Notes |
 |---|---|---|
 | `foundry-cli` | `shpitdev/foundry-cli` GitHub Releases | Private darwin arm64 and amd64 release assets fetched through the GitHub Releases API, with release-provided SHA-256 digests verified before formula generation. Uses the standard tap authentication path. |
-| `meshix-cli` | `shpitdev/meshix-observability` GitHub Releases | Private darwin arm64 release asset fetched through the GitHub Releases API. The formula first checks `HOMEBREW_GITHUB_API_TOKEN`, `GH_TOKEN`, and `GITHUB_TOKEN`, then falls back to `gh auth token`, and only then checks `SHPIT_GH_TOKEN` for SHPIT automation environments. |
 | `tabex` | `shpitdev/pkgbuilds` GitHub Releases | Public darwin arm64 binary mirrored from the private Tabex release after digest and archive verification. Mirrored versions install anonymously. |
-| `osyrra` | `shpitdev/osyrra` GitHub Releases | Private darwin arm64 release asset fetched through the GitHub Releases API. Same auth path as `meshix-cli`. |
+| `osyrra` | `shpitdev/osyrra` GitHub Releases | Private darwin arm64 release asset fetched through the GitHub Releases API. The formula first checks `HOMEBREW_GITHUB_API_TOKEN`, `GH_TOKEN`, and `GITHUB_TOKEN`, then falls back to `gh auth token`, and only then checks `SHPIT_GH_TOKEN` for SHPIT automation environments. |
 
 ## Automation
 
@@ -26,7 +25,6 @@ Once the GitHub repo exists as `shpitdev/homebrew-tap`:
 ```bash
 brew tap shpitdev/tap
 brew install shpitdev/tap/foundry-cli
-brew install shpitdev/tap/meshix-cli
 brew install shpitdev/tap/tabex
 brew install shpitdev/tap/osyrra
 ```
@@ -34,7 +32,6 @@ brew install shpitdev/tap/osyrra
 If `gh` is not installed or not logged in locally, run installs with an explicit token:
 
 ```bash
-HOMEBREW_GITHUB_API_TOKEN="$(gh auth token)" brew install shpitdev/tap/meshix-cli
 HOMEBREW_GITHUB_API_TOKEN="$(gh auth token)" brew install shpitdev/tap/foundry-cli
 # Required for the legacy Tabex v0.0.11 formula only.
 HOMEBREW_GITHUB_API_TOKEN="$(gh auth token)" brew install shpitdev/tap/tabex
@@ -51,8 +48,8 @@ That saves browser config, installs or updates the managed Chrome extension loca
 
 ## Current Limitation
 
-- `meshix-cli`, `tabex`, and `osyrra` are macOS arm64 only. `foundry-cli` also supports macOS Intel.
-- `foundry-cli`, `meshix-cli`, and `osyrra` currently come from private upstream repos, so those install paths remain SHPIT-internal until their release assets become public.
+- `tabex` and `osyrra` are macOS arm64 only. `foundry-cli` also supports macOS Intel.
+- `foundry-cli` and `osyrra` currently come from private upstream repos, so those install paths remain SHPIT-internal until their release assets become public.
 - Tabex `v0.0.11` predates the public binary channel and still requires private GitHub access. The first Tabex version mirrored through `shpitdev/pkgbuilds` and later versions install anonymously; automation will replace the legacy formula when that release exists.
 - Automation reads private releases for the other formulae with the `SHPIT_GH_TOKEN` secret, but local installs should usually rely on your logged-in `gh` session or one of the standard Homebrew GitHub token env vars.
 
