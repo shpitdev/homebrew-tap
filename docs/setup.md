@@ -17,7 +17,7 @@ Result:
 - branch and PR creation use the repo `GITHUB_TOKEN`
 - private SHPIT formula refreshes work only if the repo can read `SHPIT_GH_TOKEN`
 - there is no separate publish workflow because the tap repo itself is the distribution surface
-- upstream `foundry-cli`, `meshix-observability`, `tabex`, and `osyrra` release workflows can also trigger this workflow automatically with `gh workflow run version-bumps.yml`; `foundry-cli` may pass `-f foundry_cli_release_tag="${RELEASE_TAG}"` to pin the release being propagated
+- upstream `foundry-cli`, `tabex`, and `osyrra` release workflows can also trigger this workflow automatically with `gh workflow run version-bumps.yml`; `foundry-cli` may pass `-f foundry_cli_release_tag="${RELEASE_TAG}"` to pin the release being propagated
 
 ## GitHub UI Links
 
@@ -27,7 +27,7 @@ Result:
 
 ## SHPIT_GH_TOKEN
 
-Create the secret (org-level or repo-level) with access to read private releases on `shpitdev/foundry-cli`, `shpitdev/meshix-observability`, `shpitdev/tabex`, and `shpitdev/osyrra`. An org-level secret with `selected` visibility works well if you consume it from multiple repos.
+Create the secret (org-level or repo-level) with access to read private releases on `shpitdev/foundry-cli`, `shpitdev/tabex`, and `shpitdev/osyrra`. An org-level secret with `selected` visibility works well if you consume it from multiple repos.
 
 Attach it to this repo with:
 
@@ -48,16 +48,12 @@ Create a fine-grained PAT that can trigger workflow dispatches in:
 Store that PAT as the GitHub org secret `SHPIT_WORKFLOW_DISPATCH_TOKEN` with `selected` visibility for these producer repos:
 
 - `shpitdev/foundry-cli`
-- `shpitdev/meshix-observability`
 - `shpitdev/tabex`
 - `shpitdev/osyrra`
 
 Those producer release workflows run in Depot CI, so GitHub org secrets are not enough on their own. Mirror the same secret into Depot for each producer repo with one of these paths:
 
 ```bash
-cd /home/anandpant/Development/shpitdev/meshix/meshix-observability
-depot ci migrate secrets-and-vars -y
-
 cd /home/anandpant/Development/shpitdev/tabex
 depot ci migrate secrets-and-vars -y
 
@@ -68,7 +64,6 @@ depot ci migrate secrets-and-vars -y
 Or add the Depot secrets directly:
 
 ```bash
-depot ci secrets add SHPIT_WORKFLOW_DISPATCH_TOKEN --repo shpitdev/meshix-observability
 depot ci secrets add SHPIT_WORKFLOW_DISPATCH_TOKEN --repo shpitdev/tabex
 depot ci secrets add SHPIT_WORKFLOW_DISPATCH_TOKEN --repo shpitdev/osyrra
 ```
@@ -84,7 +79,7 @@ If you are logged into GitHub locally with `gh auth login`, you can run:
 
 That uses your local GitHub CLI session for private release access.
 
-For local installs, all four SHPIT formulae (`foundry-cli`, `meshix-cli`, `tabex`, and `osyrra`) use the same private-auth path:
+For local installs, all three SHPIT formulae (`foundry-cli`, `tabex`, and `osyrra`) use the same private-auth path:
 
 - they first check `HOMEBREW_GITHUB_API_TOKEN`, `GH_TOKEN`, and `GITHUB_TOKEN`
 - if none of those are set, they fall back to `gh auth token`
@@ -101,7 +96,7 @@ That is intentional. `v0.0.4` is the first stable release that ships the source-
 
 ## Package-Manager Install Behavior
 
-All four current SHPIT formulae use install-side GitHub auth:
+All three current SHPIT formulae use install-side GitHub auth:
 
 - they check `HOMEBREW_GITHUB_API_TOKEN`, `GH_TOKEN`, and `GITHUB_TOKEN`
 - if no standard token env var is present, they fall back to `gh auth token`
@@ -112,5 +107,5 @@ All four current SHPIT formulae use install-side GitHub auth:
 ## Recommended Follow-Up
 
 1. Confirm `SHPIT_GH_TOKEN` is attached to this repo.
-2. Validate real `brew install shpitdev/tap/meshix-cli`, `brew install shpitdev/tap/tabex`, and `brew install shpitdev/tap/osyrra` flows on a macOS arm64 machine, especially in shells where `SHPIT_GH_TOKEN` may already be exported.
+2. Validate real `brew install shpitdev/tap/tabex` and `brew install shpitdev/tap/osyrra` flows on a macOS arm64 machine, especially in shells where `SHPIT_GH_TOKEN` may already be exported.
 3. Keep the package-manager caveats aligned with the upstream installers when shell or setup UX changes.
