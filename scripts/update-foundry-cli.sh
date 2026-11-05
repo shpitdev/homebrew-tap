@@ -54,12 +54,6 @@ verify_release_archive() {
   grep -Fxq "foundry-cli" <<<"${listing}"
   grep -Fxq "LICENSE" <<<"${listing}"
   grep -Fxq "README.md" <<<"${listing}"
-  grep -Fxq "templates/catalog.json" <<<"${listing}"
-
-  if ! grep -Eq '^templates/(compute-module-ts|compute-modules/typescript)/package\.json$' <<<"${listing}"; then
-    echo "Release archive ${archive} is missing a recognized compute module template package.json." >&2
-    exit 1
-  fi
 }
 
 fetch_release_by_tag() {
@@ -280,13 +274,6 @@ class FoundryCli < Formula
 
   def install
     libexec.install Dir["*"]
-
-    templates_root = libexec/"templates"
-    templates_root.mkpath
-
-    template_readme = templates_root/"README.md"
-    template_readme.write("# templates\n") unless template_readme.exist?
-
     bin.install_symlink libexec/"foundry-cli"
   end
 

@@ -86,13 +86,6 @@ class FoundryCli < Formula
 
   def install
     libexec.install Dir["*"]
-
-    templates_root = libexec/"templates"
-    templates_root.mkpath
-
-    template_readme = templates_root/"README.md"
-    template_readme.write("# templates\n") unless template_readme.exist?
-
     bin.install_symlink libexec/"foundry-cli"
   end
 
