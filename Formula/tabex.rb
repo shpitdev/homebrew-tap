@@ -1,14 +1,14 @@
 class Tabex < Formula
   desc "Tabex CLI for browser session, capture, and page inspection"
   homepage "https://github.com/shpitdev/tabex"
-  version "0.0.48"
+  version "0.0.51"
   license :cannot_represent
   depends_on arch: :arm64
 
   on_macos do
     on_arm do
-      url "https://github.com/shpitdev/pkgbuilds/releases/download/tabex-v0.0.48/tabex_v0.0.48_darwin_arm64.tar.gz"
-      sha256 "a429b39f8f6b5d1b2fb16da8fd86ef00eaa413ec9e2db45aca2d8756abbbe57a"
+      url "https://github.com/shpitdev/pkgbuilds/releases/download/tabex-v0.0.51/tabex_v0.0.51_darwin_arm64.tar.gz"
+      sha256 "d2de1847d11e50ecb9340b1acc4525343a6ac88431b412c0a0ffe50c68b8c126"
     end
   end
 
