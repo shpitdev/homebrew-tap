@@ -22,13 +22,13 @@ fi
 
 foundry_formula="${repo_root}/Formula/foundry-cli.rb"
 if [[ -f "${foundry_formula}" ]]; then
-  expected_foundry_version="0.2.4"
-  expected_foundry_arm64_asset_id="736501880"
-  expected_foundry_arm64_basename="foundry-cli_0.2.4_darwin_arm64.tar.gz"
-  expected_foundry_arm64_sha="37813c1a94147bfb88ebd0b1ef8c7ec50f2d856f63b9ea34b0c3d06659625ce9"
-  expected_foundry_amd64_asset_id="736501784"
-  expected_foundry_amd64_basename="foundry-cli_0.2.4_darwin_amd64.tar.gz"
-  expected_foundry_amd64_sha="937193ade5ed62bcc0da8fd9248dc0990f44d9cb5e17dcf5276e2cfbad38ce59"
+  expected_foundry_version="0.2.6"
+  expected_foundry_arm64_asset_id="742126339"
+  expected_foundry_arm64_basename="foundry-cli_0.2.6_darwin_arm64.tar.gz"
+  expected_foundry_arm64_sha="d180cbd2fd30265e1682ed172de8d722fcee81a253de1fbcaaec2a9e79d676bb"
+  expected_foundry_amd64_asset_id="742126271"
+  expected_foundry_amd64_basename="foundry-cli_0.2.6_darwin_amd64.tar.gz"
+  expected_foundry_amd64_sha="90df9b5aaf3b7c9adc2b685ffa1327dd0056b81d7f6b91c1e45e7e4e62dc3782"
 
   grep -q 'class FoundryCli < Formula' "${foundry_formula}"
   grep -q 'using: FoundryCliGitHubReleaseDownloadStrategy' "${foundry_formula}"
