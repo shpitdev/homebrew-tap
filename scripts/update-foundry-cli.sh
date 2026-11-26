@@ -51,9 +51,14 @@ verify_release_archive() {
 
   listing="$(tar -tzf "${archive}")"
 
-  grep -Fxq "foundry-cli" <<<"${listing}"
-  grep -Fxq "LICENSE" <<<"${listing}"
-  grep -Fxq "README.md" <<<"${listing}"
+  local required
+  for required in '^foundry-cli$' '^LICENSE$' '^README\.md$' '^bin/foundry-cli-ts$' \
+    '^libexec/cli-ts/[^/]+/launch\.cjs$' '^libexec/superrepo/[^/]+/main\.mjs$'; do
+    if ! grep -Eq "${required}" <<<"${listing}"; then
+      echo "Release archive ${archive} is missing a required member (${required})." >&2
+      return 1
+    fi
+  done
 }
 
 fetch_release_by_tag() {
@@ -185,115 +190,45 @@ fi
   verify_release_archive "${arm64_asset}"
 )
 
-cat > "${formula_path}" <<EOF
-class FoundryCliGitHubReleaseDownloadStrategy < CurlDownloadStrategy
-  def initialize(url, name, version, **meta)
-    @resolved_basename = meta.delete(:resolved_basename)
-    @github_token = resolve_github_token
-
-    if @github_token.nil? || @github_token.empty?
-      raise CurlDownloadStrategyError.new(
-        url,
-        [
-          "GitHub authentication is required to download the private foundry-cli release asset.",
-          "Set HOMEBREW_GITHUB_API_TOKEN, GH_TOKEN, or GITHUB_TOKEN,",
-          "or log in with gh auth login. SHPIT_GH_TOKEN is also supported for SHPIT automation."
-        ].join(" ")
-      )
-    end
-
-    meta[:headers] ||= []
-    meta[:headers] << "Accept: application/octet-stream"
-    meta[:headers] << "Authorization: Bearer #{@github_token}"
-    super
-  end
-
-  private
-
-  def resolve_github_token
-    %w[HOMEBREW_GITHUB_API_TOKEN GH_TOKEN GITHUB_TOKEN].each do |key|
-      value = ENV[key]&.strip
-      return value unless value.nil? || value.empty?
-    end
-
-    [
-      "#{HOMEBREW_PREFIX}/bin/gh",
-      "/opt/homebrew/bin/gh",
-      "/usr/local/bin/gh",
-      "gh"
-    ].uniq.each do |gh|
-      next if gh != "gh" && !File.executable?(gh)
-
-      value = Utils.safe_popen_read(gh, "auth", "token").strip
-      return value unless value.empty?
-    rescue ErrorDuringExecution, Errno::ENOENT
-      next
-    end
-
-    value = ENV["SHPIT_GH_TOKEN"]&.strip
-    return value unless value.nil? || value.empty?
-
-    nil
-  end
-
-  def resolve_url_basename_time_file_size(url, timeout: nil)
-    resolved_url, _, last_modified, file_size, content_type, is_redirection = super
-    [resolved_url, @resolved_basename, last_modified, file_size, content_type, is_redirection]
-  end
-
-  def curl_output(*args, **options)
-    super(*args, secrets: [@github_token], **options)
-  end
-
-  def curl(*args, print_stdout: true, **options)
-    super(*args, print_stdout: print_stdout, secrets: [@github_token], **options)
-  end
-end
-
-class FoundryCli < Formula
-  desc "Foundry DevOps automation CLI"
-  homepage "https://github.com/shpitdev/foundry-cli"
-  version "${version}"
-  license :cannot_represent
-
-  on_macos do
-    on_arm do
-      url "${arm64_api_url}",
-          using: FoundryCliGitHubReleaseDownloadStrategy,
-          resolved_basename: "${arm64_asset}"
-      sha256 "${arm64_sha}"
-    end
-
-    on_intel do
-      url "${amd64_api_url}",
-          using: FoundryCliGitHubReleaseDownloadStrategy,
-          resolved_basename: "${amd64_asset}"
-      sha256 "${amd64_sha}"
-    end
-  end
-
-  def install
-    libexec.install Dir["*"]
-    bin.install_symlink libexec/"foundry-cli"
-  end
-
-  def caveats
-    <<~EOS
-      Package-manager installs do not edit your shell config.
-
-      To add shell completion in zsh:
-        printf '\\nsource <(foundry-cli completion --code zsh)\\n' >> ~/.zshrc
-
-      To add it in bash:
-        printf '\\nsource <(foundry-cli completion --code bash)\\n' >> ~/.bashrc
-    EOS
-  end
-
-  test do
-    assert_match version.to_s, shell_output("#{bin}/foundry-cli version")
-  end
-end
-EOF
+# Keep the recipe and its authenticated download strategy in the formula, not a second template.
+formula_tmp="${tmpdir}/foundry-cli.rb"
+awk \
+  -v version="${version}" \
+  -v arm64_url="${arm64_api_url}" -v arm64_asset="${arm64_asset}" -v arm64_sha="${arm64_sha}" \
+  -v amd64_url="${amd64_api_url}" -v amd64_asset="${amd64_asset}" -v amd64_sha="${amd64_sha}" '
+  /^  version "/ {
+    new_release = ($2 != "\"" version "\"")
+    print "  version \"" version "\""
+    updated++
+    next
+  }
+  /^  revision [0-9]+$/ && new_release { next }
+  /^    on_arm do$/   { url = arm64_url; asset = arm64_asset; sha = arm64_sha }
+  /^    on_intel do$/ { url = amd64_url; asset = amd64_asset; sha = amd64_sha }
+  /^    end$/ { url = "" }
+  url && /^      url "/ {
+    print "      url \"" url "\","
+    updated++
+    next
+  }
+  url && /^          resolved_basename: "/ {
+    print "          resolved_basename: \"" asset "\""
+    updated++
+    next
+  }
+  url && /^      sha256 "/ {
+    print "      sha256 \"" sha "\""
+    updated++
+    next
+  }
+  { print }
+  END {
+    if (updated != 7) {
+      print "Unable to update foundry-cli formula metadata." > "/dev/stderr"
+      exit 1
+    }
+  }
+' "${formula_path}" > "${formula_tmp}"
 
 validator_tmp="${tmpdir}/validate-formulae.sh"
 awk \
@@ -348,4 +283,5 @@ awk \
   }
 ' "${validator_path}" > "${validator_tmp}"
 chmod +x "${validator_tmp}"
+mv "${formula_tmp}" "${formula_path}"
 mv "${validator_tmp}" "${validator_path}"

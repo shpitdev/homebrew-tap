@@ -34,8 +34,6 @@ if [[ -f "${foundry_formula}" ]]; then
   grep -q 'using: FoundryCliGitHubReleaseDownloadStrategy' "${foundry_formula}"
   grep -q 'resolved_basename: "foundry-cli_' "${foundry_formula}"
   grep -q 'url "https://api.github.com/repos/shpitdev/foundry-cli/releases/assets/' "${foundry_formula}"
-  grep -q 'bin.install_symlink libexec/"foundry-cli"' "${foundry_formula}"
-  grep -q 'shell_output("#{bin}/foundry-cli version")' "${foundry_formula}"
   grep -Fq "version \"${expected_foundry_version}\"" "${foundry_formula}"
   grep -Fq "releases/assets/${expected_foundry_arm64_asset_id}" "${foundry_formula}"
   grep -Fq "resolved_basename: \"${expected_foundry_arm64_basename}\"" "${foundry_formula}"

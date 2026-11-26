@@ -105,12 +105,15 @@ make_archive() {
   local layout="$2"
   local omitted="${3:-}"
   local root="${test_root}/archive-root"
-  local members=(foundry-cli LICENSE README.md)
+  local members=(foundry-cli LICENSE README.md bin libexec)
 
   rm -rf "${root}"
-  mkdir -p "${root}"
-  printf '#!/bin/sh\n[ "$1" = version ] || exit 1\nprintf "foundry-cli fixture\\n"\n' > "${root}/foundry-cli"
-  chmod +x "${root}/foundry-cli"
+  mkdir -p "${root}/bin" "${root}/libexec/cli-ts/1.0.0" "${root}/libexec/superrepo/1.0.0"
+  printf '#!/bin/sh\n[ "$1" = version ] || exit 1\necho "go fixture"\n' > "${root}/foundry-cli"
+  printf '#!/bin/sh\n[ "$1" = version ] || exit 1\necho "ts fixture"\n' > "${root}/bin/foundry-cli-ts"
+  chmod +x "${root}/foundry-cli" "${root}/bin/foundry-cli-ts"
+  printf 'TS payload\n' > "${root}/libexec/cli-ts/1.0.0/launch.cjs"
+  printf 'SuperRepo payload\n' > "${root}/libexec/superrepo/1.0.0/main.mjs"
   printf 'proprietary\n' > "${root}/LICENSE"
   printf '# foundry-cli\n' > "${root}/README.md"
   case "${layout}" in
@@ -127,16 +130,9 @@ make_archive() {
       ;;
     *) echo "Unknown archive layout: ${layout}" >&2; exit 1 ;;
   esac
-  if [[ -n "${omitted}" ]]; then
-    rm "${root}/${omitted}"
-    members=()
-    for member in foundry-cli LICENSE README.md; do
-      [[ "${member}" == "${omitted}" ]] || members+=("${member}")
-    done
-  fi
   (
     cd "${root}"
-    tar -czf "${output}" "${members[@]}"
+    tar --exclude="${omitted}" -czf "${output}" "${members[@]}"
   )
 }
 
@@ -229,7 +225,7 @@ grep -Fq "expected_foundry_amd64_basename=\"${amd64_asset}\"" "${generated_valid
 grep -Fq "expected_foundry_amd64_sha=\"${amd64_sha}\"" "${generated_validator}"
 
 for asset in "${amd64_asset}" "${arm64_asset}"; do
-  for required_file in foundry-cli LICENSE README.md; do
+  for required_file in foundry-cli LICENSE README.md bin/foundry-cli-ts libexec/cli-ts/1.0.0/launch.cjs libexec/superrepo/1.0.0/main.mjs; do
     make_archive "${test_root}/archives/${amd64_asset}" core-only
     make_archive "${test_root}/archives/${arm64_asset}" core-only
     make_archive "${test_root}/archives/${asset}" core-only "${required_file}"
