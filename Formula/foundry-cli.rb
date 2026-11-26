@@ -67,6 +67,7 @@ class FoundryCli < Formula
   homepage "https://github.com/shpitdev/foundry-cli"
   version "0.2.8"
   license :cannot_represent
+  revision 1
 
   on_macos do
     on_arm do
@@ -86,12 +87,18 @@ class FoundryCli < Formula
 
   def install
     libexec.install Dir["*"]
-    bin.install_symlink libexec/"foundry-cli"
+    go = libexec/"bin/foundry-cli-go"
+    FileUtils.mv libexec/"foundry-cli", go
+    bin.install_symlink go, libexec/"bin/foundry-cli-ts"
+    bin.install_symlink go => "foundry-cli"
+    bin.install_symlink go => "fcli"
   end
 
   def caveats
     <<~EOS
       Package-manager installs do not edit your shell config.
+      foundry-cli and fcli run Go. Use install.sh --alias ts for a standalone install with TypeScript as the default.
+      foundry-cli-ts and foundry-cli superrepo need Node.js 26 or newer on PATH.
 
       To add shell completion in zsh:
         printf '\nsource <(foundry-cli completion --code zsh)\n' >> ~/.zshrc
@@ -102,6 +109,13 @@ class FoundryCli < Formula
   end
 
   test do
-    assert_match version.to_s, shell_output("#{bin}/foundry-cli version")
+    %w[foundry-cli-go foundry-cli fcli].each do |name|
+      assert_match version.to_s, shell_output("#{bin}/#{name} version")
+    end
+
+    # Node is optional; test the TypeScript executable only when it is on PATH.
+    if which("node")
+      assert_match(/\d+\.\d+\.\d+/, shell_output("#{bin}/foundry-cli-ts version"))
+    end
   end
 end
