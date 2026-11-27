@@ -97,7 +97,7 @@ class FoundryCli < Formula
     <<~EOS
       Package-manager installs do not edit your shell config.
       foundry-cli and fcli run Go. Use install.sh --alias ts for a standalone install with TypeScript as the default.
-      foundry-cli-ts and foundry-cli superrepo need Node.js 26 or newer on PATH.
+      foundry-cli-ts and foundry-cli superrepo need Node.js 24.15 or later on PATH.
 
       To add shell completion in zsh:
         printf '\nsource <(foundry-cli completion --code zsh)\n' >> ~/.zshrc
